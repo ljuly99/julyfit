@@ -142,26 +142,25 @@ function Ring({pct,size=64,stroke=6,color,children}){
 function PBar({val,max,color,h=6}){
   return(React.createElement('div', { style: {height:h,borderRadius:h,background:"var(--ring-bg)",overflow:"hidden"}}, React.createElement('div', { style: {width:`${Math.min(100,max>0?val/max*100:0)}%`,height:"100%",background:val>max?"#EF233C":color,borderRadius:h,transition:"width .5s"}})));
 }
-function BFWidget({sex,height,waist,hips,neck,bodyfat,onChange}){
+function BFWidget({sex,height,waist,hips,neck,bodyfat,onChange,age=45}){
   const bf=calcBF(sex,height,waist,hips,neck);
-  // Rangos ajustados por edad (ACE - American Council on Exercise)
-  const age=parseInt(pr&&pr.age||45);
-  const getFCRanges=(a)=>{
-    if(a<30) return [[14,"Atlética","#0096C7"],[21,"En forma","#2DC653"],[25,"Promedio","#F4A261"],[32,"Alto","#E76F51"],[100,"Muy alto","#EF233C"]];
-    if(a<40) return [[15,"Atlética","#0096C7"],[23,"En forma","#2DC653"],[28,"Promedio","#F4A261"],[35,"Alto","#E76F51"],[100,"Muy alto","#EF233C"]];
-    if(a<50) return [[16,"Atlética","#0096C7"],[25,"En forma","#2DC653"],[30,"Promedio","#F4A261"],[37,"Alto","#E76F51"],[100,"Muy alto","#EF233C"]];
+  const _age=parseInt(age||45);
+  const getFCRanges=(_a)=>{
+    if(_a<30) return [[14,"Atlética","#0096C7"],[21,"En forma","#2DC653"],[25,"Promedio","#F4A261"],[32,"Alto","#E76F51"],[100,"Muy alto","#EF233C"]];
+    if(_a<40) return [[15,"Atlética","#0096C7"],[23,"En forma","#2DC653"],[28,"Promedio","#F4A261"],[35,"Alto","#E76F51"],[100,"Muy alto","#EF233C"]];
+    if(_a<50) return [[16,"Atlética","#0096C7"],[25,"En forma","#2DC653"],[30,"Promedio","#F4A261"],[37,"Alto","#E76F51"],[100,"Muy alto","#EF233C"]];
     return [[17,"Atlética","#0096C7"],[27,"En forma","#2DC653"],[33,"Promedio","#F4A261"],[39,"Alto","#E76F51"],[100,"Muy alto","#EF233C"]];
   };
-  const getMCRanges=(a)=>{
-    if(a<30) return [[6,"Esencial","#0096C7"],[14,"Atlético","#2DC653"],[18,"En forma","#2DC653"],[25,"Promedio","#F4A261"],[100,"Alto","#EF233C"]];
-    if(a<40) return [[6,"Esencial","#0096C7"],[15,"Atlético","#2DC653"],[20,"En forma","#2DC653"],[27,"Promedio","#F4A261"],[100,"Alto","#EF233C"]];
+  const getMCRanges=(_a)=>{
+    if(_a<30) return [[6,"Esencial","#0096C7"],[14,"Atlético","#2DC653"],[18,"En forma","#2DC653"],[25,"Promedio","#F4A261"],[100,"Alto","#EF233C"]];
+    if(_a<40) return [[6,"Esencial","#0096C7"],[15,"Atlético","#2DC653"],[20,"En forma","#2DC653"],[27,"Promedio","#F4A261"],[100,"Alto","#EF233C"]];
     return [[6,"Esencial","#0096C7"],[16,"Atlético","#2DC653"],[22,"En forma","#2DC653"],[29,"Promedio","#F4A261"],[100,"Alto","#EF233C"]];
   };
-  const FC=getFCRanges(age);
-  const MC=getMCRanges(age);
+  const FC=getFCRanges(_age);
+  const MC=getMCRanges(_age);
   const idealRange=sex==="female"?
-    (age<30?{min:18,max:25}:age<40?{min:20,max:28}:age<50?{min:22,max:30}:{min:24,max:33}):
-    (age<30?{min:8,max:18}:age<40?{min:10,max:20}:{min:12,max:22});
+    (_age<30?{min:18,max:25}:_age<40?{min:20,max:28}:_age<50?{min:22,max:30}:{min:24,max:33}):
+    (_age<30?{min:8,max:18}:_age<40?{min:10,max:20}:{min:12,max:22});
   const bfStatus=bf!==null?(bf<idealRange.min?"⬇️ Por debajo del rango para tu edad":bf<=idealRange.max?"✅ En rango ideal para tu edad":"⬆️ Encima del rango — trabajando en ello 💪"):null;
   if(bf!==null){
     if(String(bf)!==bodyfat) setTimeout(()=>onChange(String(bf)),0);
@@ -963,7 +962,7 @@ textarea.inp{resize:vertical;line-height:1.6}
                 , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Cuello (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: mF.neck, onChange: e=>setMF({...mF,neck:e.target.value})}))
                 , pr.sex==="female"&&React.createElement('div', { style: {gridColumn:"1/-1"}}, React.createElement('div', { className: "lbl"}, "Cadera (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: mF.hips, onChange: e=>setMF({...mF,hips:e.target.value})}))
               )
-              , React.createElement(BFWidget, { sex: pr.sex, height: pr.height, waist: mF.waist, hips: mF.hips, neck: mF.neck, bodyfat: mF.bodyfat, onChange: val=>setMF(f=>({...f,bodyfat:val}))})
+              , React.createElement(BFWidget, { sex: pr.sex, height: pr.height, waist: mF.waist, hips: mF.hips, neck: mF.neck, bodyfat: mF.bodyfat, age: pr.age, onChange: val=>setMF(f=>({...f,bodyfat:val}))})
             )
             , React.createElement('div', { style: {borderTop:`1px solid ${T.brd}`,paddingTop:12}}, React.createElement('div', { className: "g2"}
               , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Pecho (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: mF.chest, onChange: e=>setMF({...mF,chest:e.target.value})}))
