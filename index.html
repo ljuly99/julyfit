@@ -262,14 +262,10 @@ function App(){
     }
   },[]);
 
-  // Auto-sync profile changes to data (correlacion entre pestanas)
+  // Sync profile to data when pr changes (no Firebase write to avoid loops)
   useEffect(()=>{
     if(!curUser) return;
-    const updated={...data,profile:pr};
-    setData(updated);
-    try{localStorage.setItem("jf_u_"+curUser,JSON.stringify(updated));}catch(e){}
-    const db=getDB();
-    if(db&&curUser) db.collection("userData").doc(curUser).set(updated).catch(()=>{});
+    setData(d=>({...d,profile:pr}));
   },[pr]);
 
   const saveUsers=(u)=>{
@@ -316,15 +312,28 @@ function App(){
   const save=(next,uname)=>{
     const n=uname||curUser;
     setData(next);
-    // Always save to localStorage first (instant, offline)
-    try{localStorage.setItem("jf_u_"+n,JSON.stringify(next));}catch(e){console.warn("LS:",e);}
-    // Then sync to Firestore (cloud)
+    // Save to localStorage (instant)
+    try{localStorage.setItem("jf_u_"+n,JSON.stringify(next));}catch(e){}
+    // Save to Firestore - strip large base64 photos to stay under 1MB limit
     try{
       const db=getDB();
       if(db&&n){
-        db.collection("userData").doc(n).set(next)
-          .then(()=>console.log("Saved to Firestore"))
-          .catch(e=>console.warn("FB save error:",e));
+        const forCloud={...next};
+        // Remove base64 photos from cloud save (keep URL photos)
+        if(forCloud.initM&&forCloud.initM.photoUrl&&forCloud.initM.photoUrl.startsWith("data:")){
+          forCloud.initM={...forCloud.initM,photoUrl:""};
+        }
+        if(forCloud.photos){
+          forCloud.photos=forCloud.photos.filter(p=>!p.url||!p.url.startsWith("data:"));
+        }
+        const size=JSON.stringify(forCloud).length;
+        if(size<900000){
+          db.collection("userData").doc(n).set(forCloud)
+            .then(()=>console.log("Firestore OK",Math.round(size/1024)+"KB"))
+            .catch(e=>console.warn("FB:",e.message));
+        } else {
+          console.warn("Data too large for Firestore:",Math.round(size/1024)+"KB");
+        }
       }
     }catch(e){console.warn("FB:",e);}
   };
