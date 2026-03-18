@@ -83,37 +83,68 @@ const FDB=[
 ];
 
 const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;}return h.toString(36);}
-function calcM(pr,w0,dt="normal"){
+function calcM(pr,w0,dt="training",workout=null){
   const w=parseFloat(w0||pr.weight||0),age=parseInt(pr.age||25),h=parseFloat(pr.height||170);
   if(!w||!h) return null;
   const g=GA[pr.goal]||GA.cut;
-  const dm=DT[dt]||DT.normal;
+  const dm=DT[dt]||DT.training;
 
   // PROTEINA basada en peso segun objetivo y tipo de dia
-  // En deficit se sube para preservar musculo (ISSN: 1.8-2.4g/kg)
   const protGkg={
     cut:     {training:2.2, rest:2.4},
     maintain:{training:1.8, rest:2.0},
     bulk:    {training:1.8, rest:2.0},
   };
-  const prot=Math.round(w*((protGkg[pr.goal]||protGkg.cut)[dt]||(protGkg[pr.goal]||protGkg.cut).rest));
+  let prot=Math.round(w*((protGkg[pr.goal]||protGkg.cut)[dt]||(protGkg[pr.goal]||protGkg.cut).rest));
 
-  // GRASA basada en peso (0.8-1.0g/kg segun objetivo)
+  // GRASA basada en peso
   const fatGkg={cut:0.8, maintain:1.0, bulk:1.0};
-  const fat=Math.round(w*(fatGkg[pr.goal]||0.8));
+  let fat=Math.round(w*(fatGkg[pr.goal]||0.8));
 
-  // CARBOS basados en peso, objetivo y tipo de dia
-  // Periodizacion de carbos: mas en entreno, menos en descanso
-  // Rangos validados por ISSN/ACSM para cada objetivo
+  // CARBOS base por objetivo y tipo de dia
   const carbGkg={
     cut:     {training:2.2, rest:1.4},
     maintain:{training:3.5, rest:2.2},
     bulk:    {training:4.5, rest:3.0},
   };
-  const carb=Math.round(w*((carbGkg[pr.goal]||carbGkg.cut)[dt]||(carbGkg[pr.goal]||carbGkg.cut).rest));
+  let carb=Math.round(w*((carbGkg[pr.goal]||carbGkg.cut)[dt]||(carbGkg[pr.goal]||carbGkg.cut).rest));
+
+  // AJUSTE POR DATOS DEL ENTRENAMIENTO
+  if(workout&&dt==="training"){
+    const kcalBurned=parseFloat(workout.kcal)||0;
+    const duration=parseFloat(workout.duration)||0;
+    const type=workout.type||"Fuerza";
+
+    // Nivel de intensidad basado en kcal/min
+    const kcalPerMin=duration>0?kcalBurned/duration:0;
+    const intensity=kcalPerMin>8?"alta":kcalPerMin>5?"media":"baja";
+
+    // Ajuste de carbos segun intensidad y tipo
+    const carbAdj={
+      "alta":{Fuerza:30,Cardio:45,HIIT:50,Funcional:35,Yoga:0,Caminata:10,Ciclismo:50,Otro:20},
+      "media":{Fuerza:20,Cardio:30,HIIT:35,Funcional:25,Yoga:0,Caminata:5,Ciclismo:35,Otro:15},
+      "baja":{Fuerza:10,Cardio:15,HIIT:20,Funcional:10,Yoga:0,Caminata:0,Ciclismo:15,Otro:5},
+    };
+    const adj=(carbAdj[intensity]||carbAdj.baja)[type]||10;
+    carb=Math.round(carb+adj);
+
+    // Ajuste de proteina: mas si es fuerza o duracion larga
+    if(["Fuerza","Funcional","HIIT"].includes(type)) prot=Math.round(prot*1.05);
+    if(duration>90) prot=Math.round(prot*1.08);
+
+    // Reponer kcal quemadas: 30-50% segun objetivo
+    const reponer={cut:0.3, maintain:0.5, bulk:0.7}[pr.goal]||0.3;
+    const extraKcal=Math.round(kcalBurned*reponer);
+    carb=Math.round(carb+extraKcal/4);
+  }
 
   const kcal=Math.round(prot*4+carb*4+fat*9);
-  return{kcal,prot,carb,fat,g,dm};
+  return{kcal,prot,carb,fat,g,dm,
+    intensity:workout?{
+      level:workout.kcal&&workout.duration?(parseFloat(workout.kcal)/parseFloat(workout.duration)>8?"Alta":parseFloat(workout.kcal)/parseFloat(workout.duration)>5?"Media":"Baja"):"—",
+      kcal:workout.kcal||0,type:workout.type||""
+    }:null
+  };
 }
 
 function calcBF(sex,h,w,hi,n){
@@ -366,19 +397,26 @@ function App(){
   };
   const doLogout=()=>{if(curUser)save(data);setCurUser(null);setScreen("login");setData(DEF_DATA);setTab("comidas");};
 
-  // Auto-save on page close/hide
+  // Auto-save on page close/hide/inactivity
   useEffect(()=>{
-    const handleSave=()=>{if(curUser)save(data);};
+    const handleSave=()=>{if(curUser&&data)save(data);};
     window.addEventListener("beforeunload",handleSave);
-    document.addEventListener("visibilitychange",()=>{if(document.hidden&&curUser)save(data);});
-    return()=>window.removeEventListener("beforeunload",handleSave);
+    window.addEventListener("pagehide",handleSave);
+    document.addEventListener("visibilitychange",handleSave);
+    return()=>{
+      window.removeEventListener("beforeunload",handleSave);
+      window.removeEventListener("pagehide",handleSave);
+      document.removeEventListener("visibilitychange",handleSave);
+    };
   },[data,curUser]);
 
   const getDT=(d)=>dayTypes[d]||"training";
   const setDT=(d,t)=>{const n={...dayTypes,[d]:t};setDayTypes(n);save({...data,dayTypes:n});};
   const sorted=[...data.entries].sort((a,b)=>new Date(a.date)-new Date(b.date));
   const latest=sorted[sorted.length-1];
-  const mac=calcM(pr,latest?.weight,getDT(fDate));
+  const todayWorkouts=((data.workoutLogs||{})[fDate]||[]);
+  const todayWO=todayWorkouts.length>0?todayWorkouts[todayWorkouts.length-1]:null;
+  const mac=calcM(pr,latest?.weight,getDT(fDate),getDT(fDate)==="training"?todayWO:null);
   const log=(data.foodLogs||{})[fDate]||[];
   const tot=log.reduce((a,f)=>({k:a.k+(f.k||0),p:a.p+(f.p||0),c:a.c+(f.c||0),f:a.f+(f.f||0)}),{k:0,p:0,c:0,f:0});
   const filt=srch.length>1?FDB.filter(f=>f.n.toLowerCase().includes(srch.toLowerCase())).slice(0,8):[];
@@ -608,7 +646,7 @@ textarea.inp{resize:vertical;line-height:1.6}
           )
         )
         , React.createElement('div', { style: {display:"flex",overflowX:"auto"}}
-          , [["comidas","🍽 Comidas"],["entrena","💪 Entrena"],["medidas","📏 Medidas"],["reporte","📊 Reporte"],["fotos","📸 Fotos"],["perfil","👤 Perfil"]].map(([v,l])=>(
+          , [["comidas","🍽 Comidas"],["entrena","💪 Entrena"],["medidas","📏 Medidas"],["reporte","📊 Reporte"],["perfil","👤 Perfil"]].map(([v,l])=>(
             React.createElement('button', { key: v, className: `tab ${tab===v?"on":""}`, onClick: ()=>setTab(v)}, l)
           ))
         )
