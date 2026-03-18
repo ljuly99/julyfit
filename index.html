@@ -91,9 +91,9 @@ function calcM(pr,w0,dt="training",workout=null){
 
   // PROTEINA basada en peso segun objetivo y tipo de dia
   const protGkg={
-    cut:     {training:2.2, rest:2.4},
-    maintain:{training:1.8, rest:2.0},
-    bulk:    {training:1.8, rest:2.0},
+    cut:     {training:2.5, rest:2.6},
+    maintain:{training:1.9, rest:2.0},
+    bulk:    {training:1.8, rest:1.9},
   };
   let prot=Math.round(w*((protGkg[pr.goal]||protGkg.cut)[dt]||(protGkg[pr.goal]||protGkg.cut).rest));
 
@@ -103,39 +103,43 @@ function calcM(pr,w0,dt="training",workout=null){
 
   // CARBOS base por objetivo y tipo de dia
   const carbGkg={
-    cut:     {training:2.2, rest:1.4},
+    cut:     {training:2.0, rest:1.5},
     maintain:{training:3.5, rest:2.2},
     bulk:    {training:4.5, rest:3.0},
   };
   let carb=Math.round(w*((carbGkg[pr.goal]||carbGkg.cut)[dt]||(carbGkg[pr.goal]||carbGkg.cut).rest));
 
-  // AJUSTE POR DATOS DEL ENTRENAMIENTO
+  // AJUSTE POR DATOS DEL ENTRENAMIENTO (ajuste conservador para definicion)
   if(workout&&dt==="training"){
     const kcalBurned=parseFloat(workout.kcal)||0;
     const duration=parseFloat(workout.duration)||0;
     const type=workout.type||"Fuerza";
 
-    // Nivel de intensidad basado en kcal/min
+    // Intensidad basada en kcal/min
     const kcalPerMin=duration>0?kcalBurned/duration:0;
     const intensity=kcalPerMin>8?"alta":kcalPerMin>5?"media":"baja";
 
-    // Ajuste de carbos segun intensidad y tipo
-    const carbAdj={
-      "alta":{Fuerza:30,Cardio:45,HIIT:50,Funcional:35,Yoga:0,Caminata:10,Ciclismo:50,Otro:20},
-      "media":{Fuerza:20,Cardio:30,HIIT:35,Funcional:25,Yoga:0,Caminata:5,Ciclismo:35,Otro:15},
-      "baja":{Fuerza:10,Cardio:15,HIIT:20,Funcional:10,Yoga:0,Caminata:0,Ciclismo:15,Otro:5},
+    // Ajuste MAXIMO de carbos: pequeno, solo para compensar el gasto inmediato
+    // Definicion: maximo +15g en sesion muy intensa
+    // Mantenimiento: maximo +25g
+    // Volumen: maximo +35g
+    const maxAdj={cut:15, maintain:25, bulk:35}[pr.goal]||15;
+    const carbAdjPct={
+      "alta":{Fuerza:1.0,Cardio:0.9,HIIT:1.0,Funcional:0.9,Yoga:0,Caminata:0.3,Ciclismo:0.9,Otro:0.7},
+      "media":{Fuerza:0.6,Cardio:0.6,HIIT:0.7,Funcional:0.6,Yoga:0,Caminata:0.2,Ciclismo:0.6,Otro:0.5},
+      "baja":{Fuerza:0.3,Cardio:0.3,HIIT:0.4,Funcional:0.3,Yoga:0,Caminata:0,Ciclismo:0.3,Otro:0.2},
     };
-    const adj=(carbAdj[intensity]||carbAdj.baja)[type]||10;
+    const adjPct=(carbAdjPct[intensity]||carbAdjPct.baja)[type]||0.3;
+    const adj=Math.round(maxAdj*adjPct);
     carb=Math.round(carb+adj);
 
-    // Ajuste de proteina: mas si es fuerza o duracion larga
-    if(["Fuerza","Funcional","HIIT"].includes(type)) prot=Math.round(prot*1.05);
-    if(duration>90) prot=Math.round(prot*1.08);
+    // Duracion larga (>90min): +5g carbos extra
+    if(duration>90) carb=Math.round(carb+5);
 
-    // Reponer kcal quemadas: 30-50% segun objetivo
-    const reponer={cut:0.3, maintain:0.5, bulk:0.7}[pr.goal]||0.3;
-    const extraKcal=Math.round(kcalBurned*reponer);
-    carb=Math.round(carb+extraKcal/4);
+    // Proteina: sube ligeramente en fuerza/HIIT para proteger musculo
+    if(["Fuerza","Funcional","HIIT"].includes(type)&&prot<Math.round(w*2.5)){
+      prot=Math.min(Math.round(w*2.7),Math.round(prot*1.03));
+    }
   }
 
   const kcal=Math.round(prot*4+carb*4+fat*9);
