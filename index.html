@@ -7,24 +7,15 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
   <title>JULYFIT</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet"/>
-  <style>html,body{height:100%;margin:0;padding:0;background:#0B0B14}*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}#loading{position:fixed;inset:0;background:#0B0B14;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999}</style>
+  <style>html,body{height:100%;margin:0;padding:0;background:#0B0B14}*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}</style>
 </head>
 <body>
-  <div id="loading">
-    <div style="font-size:52px;margin-bottom:16px">💪</div>
-    <div style="font-size:30px;font-weight:900;letter-spacing:4px;color:#FF6B35;margin-bottom:20px">JULYFIT</div>
-    <div style="width:160px;height:4px;background:#1E1E2E;border-radius:4px;overflow:hidden">
-      <div id="lp" style="height:100%;width:0%;background:#FF6B35;border-radius:4px;transition:width .3s"></div>
-    </div>
-  </div>
   <div id="root"></div>
   <script>
-    var _p=0,_iv=setInterval(function(){_p=Math.min(_p+8,85);var lp=document.getElementById('lp');if(lp)lp.style.width=_p+'%';},150);
-    window.__hl=function(){clearInterval(_iv);var lp=document.getElementById('lp');if(lp)lp.style.width='100%';setTimeout(function(){var e=document.getElementById('loading');if(e){e.style.transition='opacity .4s';e.style.opacity='0';setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e);},400);}},200);};
-    window.onerror=function(msg,src,line){clearInterval(_iv);var e=document.getElementById('loading');if(e)e.innerHTML='<div style="color:#EF233C;padding:30px;text-align:center;font-family:sans-serif"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-weight:700;margin-bottom:8px">Error</div><div style="font-size:12px;color:#888">'+msg+'</div></div>';};
+    window.__hl=function(){};
+    window.onerror=function(msg,src,line){
+      document.body.innerHTML='<div style="color:#EF233C;padding:30px;text-align:center;font-family:sans-serif;background:#0B0B14;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-weight:700;margin-bottom:8px">Error</div><div style="font-size:12px;color:#888">'+msg+'</div></div>';
+    };
   </script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -32,46 +23,25 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script>const _jsxFileName = "";const {useState,useEffect,useRef}=React;
 
-// API configuration
-function getAPIKey(){
-  const p=["1TIrlQ9-30ipa-tna-ks","0dveH-sRrvx-n2dqEFfS","E1ZN2Ouuphzxc9VGdxoe","Rl1bf7S2w5A5k0eO51_T","-QK_397YPQcGu3NwU7-8","AAATU1M3"];
-  return p.map(x=>x.split("").reverse().join("")).join("");
-}
-const FB_CFG = {
-  apiKey:"AIzaSyCeNULqWXLH6y9x4-8sMdaokJUS-f-sh0I",
-  authDomain:"julyfit-2c0b3.firebaseapp.com",
-  projectId:"julyfit-2c0b3",
-  storageBucket:"julyfit-2c0b3.firebasestorage.app",
-  messagingSenderId:"361893012880",
-  appId:"1:361893012880:web:d0737b853d5cf2f7033f15"
-};
-let _db=null;
-function getDB(){
-  if(_db) return _db;
-  if(typeof firebase==="undefined") return null;
-  try{
-    if(!firebase.apps.length) firebase.initializeApp(FB_CFG);
-    _db=firebase.firestore();
-    return _db;
-  }catch(e){console.error("Firebase:",e);return null;}
-}
-const USR_SK = "jf_users_bk";
-const DEF_DATA = {
-  entries:[], photos:[], foodLogs:{}, workoutLogs:{}, dayTypes:{},
+function getAPIKey(){const p=["1TIrlQ9-30ipa-tna-ks","0dveH-sRrvx-n2dqEFfS","E1ZN2Ouuphzxc9VGdxoe","Rl1bf7S2w5A5k0eO51_T","-QK_397YPQcGu3NwU7-8","AAATU1M3"];return p.map(x=>x.split("").reverse().join("")).join(""); }
+const FB_CFG = {apiKey:"AIzaSyCeNULqWXLH6y9x4-8sMdaokJUS-f-sh0I",authDomain:"julyfit-2c0b3.firebaseapp.com",projectId:"julyfit-2c0b3",storageBucket:"julyfit-2c0b3.firebasestorage.app",messagingSenderId:"361893012880",appId:"1:361893012880:web:d0737b853d5cf2f7033f15"};
+const USR_SK="jf_users_bk";
+const MEALS=["Desayuno","Almuerzo","Cena","Snack"];
+const DEF_DATA={
+  entries:[],photos:[],foodLogs:{},workoutLogs:{},dayTypes:{},chatHistory:[],
+  favFoods:[],
   profile:{name:"",age:"45",sex:"female",height:"160",weight:"60",activityLevel:"moderate",goal:"cut"},
   initM:{date:"",weight:"",waist:"",hips:"",neck:"",chest:"",arms:"",photoUrl:""},
-  assessResult:null, goalAiResult:null, weeklyReport:null,
-  favFoods:[],
+  assessResult:null,goalAiResult:null,weeklyReport:null,
 };
-const MEALS=[{v:"breakfast",l:"🌅 Desayuno"},{v:"lunch",l:"☀️ Almuerzo"},{v:"dinner",l:"🌙 Cena"},{v:"snack",l:"🍎 Snack"}];
 const ACTS=[{v:"sedentary",l:"Sedentario",m:1.2},{v:"light",l:"Ligero (1-3d/sem)",m:1.375},{v:"moderate",l:"Moderado (3-5d/sem)",m:1.55},{v:"active",l:"Activo (6-7d/sem)",m:1.725},{v:"veryactive",l:"Muy activo",m:1.9}];
-const GA={cut:{l:"Definición",ka:-400,p:2.4,f:0.8,c:"#E85D04"},maintain:{l:"Mantenimiento",ka:0,p:2.0,f:1.0,c:"#0096C7"},bulk:{l:"Volumen",ka:350,p:2.0,f:1.0,c:"#457B9D"}};
-const DT={training:{l:"💪 Entreno",kb:200,pm:1.05,c:"#E85D04",tip:"Más carbs para energía y rendimiento"},rest:{l:"😴 Descanso",kb:-200,pm:1.1,c:"#0096C7",tip:"Menos carbs, más proteína para recuperar"}};
-const WT=["Fuerza","Cardio","HIIT","Funcional","Yoga","Caminata","Ciclismo","Otro"];
+const GA={cut:{l:"Definición",ka:-400,c:"#E85D04"},maintain:{l:"Mantenimiento",ka:0,c:"#0096C7"},bulk:{l:"Volumen",ka:350,c:"#457B9D"}};
+const DT={training:{l:"💪 Entreno",c:"#E85D04",tip:"Más carbs para energía y rendimiento"},rest:{l:"😴 Descanso",c:"#0096C7",tip:"Menos carbs, más proteína para recuperar"}};
+const WT=["Fuerza","Cardio","HIIT","Funcional","Yoga","Caminata","Ciclismo","Natación","Otro"];
 const FDB=[
   {n:"Pechuga pollo",cat:"🥩",p:31,c:0,f:3.6,k:165},{n:"Muslo pollo",cat:"🥩",p:25,c:0,f:8,k:177},
   {n:"Atún en agua",cat:"🐟",p:26,c:0,f:1,k:116},{n:"Salmón",cat:"🐟",p:25,c:0,f:13,k:208},
-  {n:"Huevo entero",cat:"🥚",p:13,c:1.1,f:11,k:155},{n:"Clara huevo",cat:"🥚",p:11,c:0.7,f:0.2,k:52},{n:"Yogur griego 0%",cat:"🥚",p:10,c:3.6,f:0.4,k:59},
+  {n:"Huevo entero",cat:"🥚",p:6.3,c:0.6,f:5,k:72},{n:"Clara huevo",cat:"🥚",p:3.6,c:0.2,f:0,k:17},{n:"Yogur griego 0%",cat:"🥚",p:10,c:3.6,f:0.4,k:59},
   {n:"Whey protein",cat:"💪",p:24,c:3,f:1.5,k:120},
   {n:"Arroz blanco",cat:"🌾",p:2.7,c:28,f:0.3,k:130},{n:"Avena",cat:"🌾",p:13,c:67,f:7,k:389},{n:"Tortilla maíz",cat:"🌾",p:6,c:49,f:2.5,k:218},
   {n:"Camote",cat:"🥔",p:1.6,c:20,f:0.1,k:86},{n:"Frijoles negros",cat:"🥔",p:8.9,c:24,f:0.5,k:132},{n:"Lentejas",cat:"🥔",p:9,c:20,f:0.4,k:116},
@@ -82,93 +52,50 @@ const FDB=[
   {n:"Café negro",cat:"🥤",p:0.3,c:0,f:0,k:2},{n:"Batido proteína",cat:"🥤",p:25,c:5,f:2,k:135},
 ];
 
-const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;}return h.toString(36);}
-function calcM(pr,w0,dt="training",workout=null){
+let _db=null;
+function getDB(){
+  if(_db) return _db;
+  if(typeof firebase==="undefined") return null;
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(FB_CFG);
+    _db=firebase.firestore();
+    return _db;
+  }catch(e){return null;}
+}
+const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;}return h.toString(36);};
+function calcM(pr,w0,dt="training"){
   const w=parseFloat(w0||pr.weight||0),age=parseInt(pr.age||25),h=parseFloat(pr.height||170);
   if(!w||!h) return null;
-  const g=GA[pr.goal]||GA.cut;
-  const dm=DT[dt]||DT.training;
-
-  // PROTEINA basada en peso segun objetivo y tipo de dia
-  const protGkg={
-    cut:     {training:2.5, rest:2.6},
-    maintain:{training:1.9, rest:2.0},
-    bulk:    {training:1.8, rest:1.9},
-  };
-  let prot=Math.round(w*((protGkg[pr.goal]||protGkg.cut)[dt]||(protGkg[pr.goal]||protGkg.cut).rest));
-
-  // GRASA basada en peso
-  const fatGkg={cut:0.8, maintain:1.0, bulk:1.0};
-  let fat=Math.round(w*(fatGkg[pr.goal]||0.8));
-
-  // CARBOS base por objetivo y tipo de dia
-  const carbGkg={
-    cut:     {training:2.0, rest:1.5},
-    maintain:{training:3.5, rest:2.2},
-    bulk:    {training:4.5, rest:3.0},
-  };
-  let carb=Math.round(w*((carbGkg[pr.goal]||carbGkg.cut)[dt]||(carbGkg[pr.goal]||carbGkg.cut).rest));
-
-  // AJUSTE POR DATOS DEL ENTRENAMIENTO (ajuste conservador para definicion)
-  if(workout&&dt==="training"){
-    const kcalBurned=parseFloat(workout.kcal)||0;
-    const duration=parseFloat(workout.duration)||0;
-    const type=workout.type||"Fuerza";
-
-    // Intensidad basada en kcal/min
-    const kcalPerMin=duration>0?kcalBurned/duration:0;
-    const intensity=kcalPerMin>8?"alta":kcalPerMin>5?"media":"baja";
-
-    // Ajuste MAXIMO de carbos: pequeno, solo para compensar el gasto inmediato
-    // Definicion: maximo +15g en sesion muy intensa
-    // Mantenimiento: maximo +25g
-    // Volumen: maximo +35g
-    const maxAdj={cut:15, maintain:25, bulk:35}[pr.goal]||15;
-    const carbAdjPct={
-      "alta":{Fuerza:1.0,Cardio:0.9,HIIT:1.0,Funcional:0.9,Yoga:0,Caminata:0.3,Ciclismo:0.9,Otro:0.7},
-      "media":{Fuerza:0.6,Cardio:0.6,HIIT:0.7,Funcional:0.6,Yoga:0,Caminata:0.2,Ciclismo:0.6,Otro:0.5},
-      "baja":{Fuerza:0.3,Cardio:0.3,HIIT:0.4,Funcional:0.3,Yoga:0,Caminata:0,Ciclismo:0.3,Otro:0.2},
-    };
-    const adjPct=(carbAdjPct[intensity]||carbAdjPct.baja)[type]||0.3;
-    const adj=Math.round(maxAdj*adjPct);
-    carb=Math.round(carb+adj);
-
-    // Duracion larga (>90min): +5g carbos extra
-    if(duration>90) carb=Math.round(carb+5);
-
-    // Proteina: sube ligeramente en fuerza/HIIT para proteger musculo
-    if(["Fuerza","Funcional","HIIT"].includes(type)&&prot<Math.round(w*2.5)){
-      prot=Math.min(Math.round(w*2.7),Math.round(prot*1.03));
-    }
-  }
-
+  const protGkg={cut:{training:2.2,rest:2.4},maintain:{training:1.8,rest:2.0},bulk:{training:1.8,rest:2.0}};
+  const fatGkg={cut:0.8,maintain:1.0,bulk:1.0};
+  const carbGkg={cut:{training:2.2,rest:1.4},maintain:{training:3.5,rest:2.2},bulk:{training:4.5,rest:3.0}};
+  const g=pr.goal||"cut";
+  const prot=Math.round(w*((protGkg[g]||protGkg.cut)[dt]||2.2));
+  const fat=Math.round(w*(fatGkg[g]||0.8));
+  const carb=Math.round(w*((carbGkg[g]||carbGkg.cut)[dt]||2.2));
   const kcal=Math.round(prot*4+carb*4+fat*9);
-  return{kcal,prot,carb,fat,g,dm,
-    intensity:workout?{
-      level:workout.kcal&&workout.duration?(parseFloat(workout.kcal)/parseFloat(workout.duration)>8?"Alta":parseFloat(workout.kcal)/parseFloat(workout.duration)>5?"Media":"Baja"):"—",
-      kcal:workout.kcal||0,type:workout.type||""
-    }:null
-  };
+  return{kcal,prot,carb,fat,goal:g,dt};
 }
-
 function calcBF(sex,h,w,hi,n){
-  // Fórmula Marina EE.UU. - convierte cm a pulgadas
   const cm2in=x=>parseFloat(x)/2.54;
   const H=cm2in(h),W=cm2in(w),HI=cm2in(hi||0),N=cm2in(n||0);
   if(!H||!W||H<30||W<5) return null;
   if(sex==="female"){
     if(!HI||!N||HI<10||N<3)return null;
-    const bf=163.205*Math.log10(W+HI-N)-97.684*Math.log10(H)-78.387;
-    return Math.max(5,Math.min(60,Math.round(bf*10)/10));
+    return Math.max(5,Math.min(60,Math.round((163.205*Math.log10(W+HI-N)-97.684*Math.log10(H)-78.387)*10)/10));
   }
   if(!N||N<3)return null;
-  const bf=86.010*Math.log10(W-N)-70.041*Math.log10(H)+36.76;
-  return Math.max(3,Math.min(55,Math.round(bf*10)/10));
+  return Math.max(3,Math.min(55,Math.round((86.010*Math.log10(W-N)-70.041*Math.log10(H)+36.76)*10)/10));
 }
 const fmt=d=>d?new Date(d+"T12:00:00").toLocaleDateString("es-MX",{day:"2-digit",month:"short"}):"";
 const fmtF=d=>d?new Date(d+"T12:00:00").toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"}):"";
 const fmtWD=d=>d?new Date(d+"T12:00:00").toLocaleDateString("es-MX",{weekday:"short"}).toUpperCase().slice(0,3):"";
 function getWk(){const t=new Date(),dy=t.getDay(),m=new Date(t);m.setDate(t.getDate()-(dy===0?6:dy-1));return Array.from({length:7},(_,i)=>{const d=new Date(m);d.setDate(m.getDate()+i);return d.toISOString().split("T")[0];});}
+function getBFCategory(bf,sex){
+  const F=sex==="female";
+  if(F){if(bf<14)return{l:"Muy bajo",c:"#457B9D",ok:false};if(bf<22)return{l:"Atlético",c:"#2DC653",ok:true};if(bf<30)return{l:"Normal",c:"#F4A261",ok:true};if(bf<35)return{l:"Alto",c:"#E85D04",ok:false};return{l:"Muy alto",c:"#EF233C",ok:false};}
+  if(bf<6)return{l:"Muy bajo",c:"#457B9D",ok:false};if(bf<14)return{l:"Atlético",c:"#2DC653",ok:true};if(bf<18)return{l:"Normal",c:"#F4A261",ok:true};if(bf<25)return{l:"Alto",c:"#E85D04",ok:false};return{l:"Muy alto",c:"#EF233C",ok:false};
+}
 
 function Ring({pct,size=64,stroke=6,color,children}){
   const r=(size-stroke*2)/2,c=2*Math.PI*r;
@@ -177,202 +104,258 @@ function Ring({pct,size=64,stroke=6,color,children}){
 function PBar({val,max,color,h=6}){
   return(React.createElement('div', { style: {height:h,borderRadius:h,background:"var(--ring-bg)",overflow:"hidden"}}, React.createElement('div', { style: {width:`${Math.min(100,max>0?val/max*100:0)}%`,height:"100%",background:val>max?"#EF233C":color,borderRadius:h,transition:"width .5s"}})));
 }
-function BFWidget({sex,height,waist,hips,neck,bodyfat,onChange,age=45}){
-  const bf=calcBF(sex,height,waist,hips,neck);
-  const _age=parseInt(age||45);
-  const getFCRanges=(_a)=>{
-    if(_a<30) return [[14,"Atlética","#0096C7"],[21,"En forma","#2DC653"],[25,"Promedio","#F4A261"],[32,"Alto","#E76F51"],[100,"Muy alto","#EF233C"]];
-    if(_a<40) return [[15,"Atlética","#0096C7"],[23,"En forma","#2DC653"],[28,"Promedio","#F4A261"],[35,"Alto","#E76F51"],[100,"Muy alto","#EF233C"]];
-    if(_a<50) return [[16,"Atlética","#0096C7"],[25,"En forma","#2DC653"],[30,"Promedio","#F4A261"],[37,"Alto","#E76F51"],[100,"Muy alto","#EF233C"]];
-    return [[17,"Atlética","#0096C7"],[27,"En forma","#2DC653"],[33,"Promedio","#F4A261"],[39,"Alto","#E76F51"],[100,"Muy alto","#EF233C"]];
-  };
-  const getMCRanges=(_a)=>{
-    if(_a<30) return [[6,"Esencial","#0096C7"],[14,"Atlético","#2DC653"],[18,"En forma","#2DC653"],[25,"Promedio","#F4A261"],[100,"Alto","#EF233C"]];
-    if(_a<40) return [[6,"Esencial","#0096C7"],[15,"Atlético","#2DC653"],[20,"En forma","#2DC653"],[27,"Promedio","#F4A261"],[100,"Alto","#EF233C"]];
-    return [[6,"Esencial","#0096C7"],[16,"Atlético","#2DC653"],[22,"En forma","#2DC653"],[29,"Promedio","#F4A261"],[100,"Alto","#EF233C"]];
-  };
-  const FC=getFCRanges(_age);
-  const MC=getMCRanges(_age);
-  const idealRange=sex==="female"?
-    (_age<30?{min:18,max:25}:_age<40?{min:20,max:28}:_age<50?{min:22,max:30}:{min:24,max:33}):
-    (_age<30?{min:8,max:18}:_age<40?{min:10,max:20}:{min:12,max:22});
-  const bfStatus=bf!==null?(bf<idealRange.min?"⬇️ Por debajo del rango para tu edad":bf<=idealRange.max?"✅ En rango ideal para tu edad":"⬆️ Encima del rango — trabajando en ello 💪"):null;
-  if(bf!==null){
-    if(String(bf)!==bodyfat) setTimeout(()=>onChange(String(bf)),0);
-    const cats=sex==="female"?FC:MC;
-    const cat=cats.find(([mx])=>bf<mx)||cats[cats.length-1];
-    return(React.createElement('div', { style: {marginTop:12,background:"var(--card2)",borderRadius:14,padding:14,border:`1px solid ${cat[2]}44`}}
-      , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}
-        , React.createElement('div', {}, React.createElement('div', { style: {fontSize:9,color:"var(--txt3)",fontWeight:700,textTransform:"uppercase"}}, "% Grasa corporal"  ), React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:38,color:cat[2],letterSpacing:1,lineHeight:1.1}}, bf, React.createElement('span', { style: {fontSize:18}}, "%")), React.createElement('span', { style: {background:cat[2]+"22",color:cat[2],borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700}}, cat[1]))
-        , React.createElement(Ring, { pct: bf, size: 72, stroke: 6, color: cat[2]}, React.createElement('span', { style: {fontSize:11,fontWeight:800,color:cat[2]}}, bf, "%"))
-      )
-      , bfStatus&&React.createElement('div', { style: {background:cat[2]+"15",borderRadius:10,padding:"8px 12px",fontSize:12,color:cat[2],fontWeight:600}}, bfStatus, " · Rango ideal: "    , idealRange.min, "-", idealRange.max, "%")
-    ));
-  }
-  const miss=sex==="female"?[!waist&&"cintura",!hips&&"cadera",!neck&&"cuello"].filter(Boolean):[!waist&&"cintura",!neck&&"cuello"].filter(Boolean);
-  if(!miss.length) return null;
-  return(React.createElement('div', { style: {marginTop:10,background:"var(--card2)",border:"1px dashed var(--brd)",borderRadius:12,padding:"10px 14px",fontSize:12,color:"var(--txt3)"}}, "Falta: " , React.createElement('span', { style: {color:"var(--acc)"}}, miss.join(", "))));
-}
 
 const THEMES={
-  dark:{bg:"#0B0B14",card:"#12121F",card2:"#1A1A2E",brd:"#2A2A3E",txt:"#F0F0FF",txt2:"#AAAACC",txt3:"#666688",acc:"#FF6B35",acc2:"#4ECDC4",ringBg:"#1E1E2E",inp:"#1A1A2E",inpBrd:"#2A2A3E"},
+  dark:{bg:"#0B0B14",card:"#12121F",card2:"#1A1A2E",brd:"#2A2A3E",txt:"#F0F0FF",txt2:"#AAAACC",txt3:"#666688",acc:"#E85D04",acc2:"#0096C7",ringBg:"#1E1E2E",inp:"#1A1A2E",inpBrd:"#2A2A3E"},
   light:{bg:"#F5F5F0",card:"#FFFFFF",card2:"#F0EEE8",brd:"#E0DDD5",txt:"#1A1A2A",txt2:"#444455",txt3:"#888899",acc:"#E85D04",acc2:"#0096C7",ringBg:"#E8E8E0",inp:"#FFFFFF",inpBrd:"#D0CEC8"},
 };
 
 function App(){
   const today=new Date().toISOString().split("T")[0];
-
-  // User management
   const [users,setUsers]=useState({});
   const [curUser,setCurUser]=useState(null);
-  const [screen,setScreen]=useState("login"); // login | register | app
-  const [loginName,setLoginName]=useState("");
-  const [loginPass,setLoginPass]=useState("");
-  const [loginErr,setLoginErr]=useState("");
-  const [regName,setRegName]=useState("");
-  const [regPass,setRegPass]=useState("");
-  const [regPass2,setRegPass2]=useState("");
-  const [regErr,setRegErr]=useState("");
-  const [showLoginPass,setShowLoginPass]=useState(false);
-  const [showRegPass,setShowRegPass]=useState(false);
-  const [showRegPass2,setShowRegPass2]=useState(false);
-  const [screen2,setScreen2]=useState("login"); // for recovery
-  const [recUser,setRecUser]=useState("");
-  const [recNewPass,setRecNewPass]=useState("");
-  const [recNewPass2,setRecNewPass2]=useState("");
-  const [recErr,setRecErr]=useState("");
-  const [showRecPass,setShowRecPass]=useState(false);
-
-  // Theme
+  const [screen,setScreen]=useState("login");
+  const [loginName,setLoginName]=useState("");const [loginPass,setLoginPass]=useState("");const [loginErr,setLoginErr]=useState("");
+  const [regName,setRegName]=useState("");const [regPass,setRegPass]=useState("");const [regPass2,setRegPass2]=useState("");const [regErr,setRegErr]=useState("");
+  const [showLoginPass,setShowLoginPass]=useState(false);const [showRegPass,setShowRegPass]=useState(false);const [showRegPass2,setShowRegPass2]=useState(false);
+  const [screen2,setScreen2]=useState("login");
+  const [recUser,setRecUser]=useState("");const [recNewPass,setRecNewPass]=useState("");const [recNewPass2,setRecNewPass2]=useState("");const [recErr,setRecErr]=useState("");const [showRecPass,setShowRecPass]=useState(false);
   const [theme,setTheme]=useState("dark");
   const T=THEMES[theme];
-
-  // App state
   const [data,setData]=useState(DEF_DATA);
   const [tab,setTab]=useState("comidas");
   const [pr,setPr]=useState(DEF_DATA.profile);
   const [initM,setInitM]=useState(DEF_DATA.initM);
   const [dayTypes,setDayTypes]=useState({});
   const [fDate,setFDate]=useState(today);
+  const [curMeal,setCurMeal]=useState("Desayuno");
   const [mode,setMode]=useState("ai");
-  const [srch,setSrch]=useState("");
-  const [sel,setSel]=useState(null);
-  const [qty,setQty]=useState("100");
-  const [brow,setBrow]=useState(false);
-  const [fcat,setFcat]=useState("🥩");
+  const [srch,setSrch]=useState("");const [sel,setSel]=useState(null);const [qty,setQty]=useState("100");
+  const [brow,setBrow]=useState(false);const [fcat,setFcat]=useState("🥩");
   const [cu,setCu]=useState({n:"",p:"",c:"",f:"",k:"",q:"100"});
-  const [aiTxt,setAiTxt]=useState("");
-  const [aiLd,setAiLd]=useState(false);
-  const [aiPrv,setAiPrv]=useState(null);
-  const [aiErr,setAiErr]=useState("");
-  const [editIdx,setEditIdx]=useState(null);
-  const [editF,setEditF]=useState({name:"",qty_description:"",protein:"",carbs:"",fat:"",kcal:""});
-  const [mealType,setMealType]=useState("breakfast");
-  const [showFavs,setShowFavs]=useState(false);
+  const [aiTxt,setAiTxt]=useState("");const [aiLd,setAiLd]=useState(false);const [aiPrv,setAiPrv]=useState(null);const [aiErr,setAiErr]=useState("");
+  const [editIdx,setEditIdx]=useState(null);const [editF,setEditF]=useState({name:"",qty_description:"",protein:"",carbs:"",fat:"",kcal:""});
   const [mF,setMF]=useState({date:today,weight:"",bodyfat:"",waist:"",hips:"",neck:"",chest:"",arms:"",note:""});
   const [cht,setCht]=useState("weight");
   const [wDate,setWDate]=useState(today);
   const [wF,setWF]=useState({type:"Fuerza",duration:"",kcal:"",activeKcal:"",heartRate:"",aerobic:"",anaerobic:"",recovery:"",notes:"",exercises:[]});
-  const [exI,setExI]=useState({name:"",sets:"",reps:"",weight:"",distance:""});
-  const [showEx,setShowEx]=useState(false);
+  const [exI,setExI]=useState({name:"",sets:"",reps:"",weight:"",distance:""});const [showEx,setShowEx]=useState(false);
   const [pUrl,setPUrl]=useState("");const [pDate,setPDate]=useState(today);const [pLbl,setPLbl]=useState("");
   const [assess,setAssess]=useState(null);const [assLd,setAssLd]=useState(false);const [assErr,setAssErr]=useState("");
   const [gObj,setGObj]=useState("");const [gAi,setGAi]=useState(null);const [gAiLd,setGAiLd]=useState(false);const [gAiErr,setGAiErr]=useState("");
   const [rep,setRep]=useState(null);const [repLd,setRepLd]=useState(false);const [repErr,setRepErr]=useState("");
+  const [chatInput,setChatInput]=useState("");const [chatLd,setChatLd]=useState(false);
   const [toast,setToast]=useState("");
+  const chatEndRef=useRef(null);
+  const phRef=useRef(null);
 
   useEffect(()=>{
-    // Load users from localStorage first (fast)
     try{const u=localStorage.getItem(USR_SK);if(u)setUsers(JSON.parse(u));}catch(e){}
-    // Then sync from Firestore
-    const db=getDB();
-    if(db){
-      db.collection("users_index").doc("all").get().then(doc=>{
-        if(doc.exists&&doc.data().users){
-          const fbUsers=doc.data().users;
-          setUsers(fbUsers);
-          try{localStorage.setItem(USR_SK,JSON.stringify(fbUsers));}catch(e){}
-        }
-      }).catch(()=>{});
-    }
+    try{const db=getDB();if(db){db.collection("users_index").doc("all").get().then(doc=>{if(doc.exists&&doc.data().users){const fu=doc.data().users;setUsers(fu);try{localStorage.setItem(USR_SK,JSON.stringify(fu));}catch(e){}}}).catch(()=>{});}}catch(e){}
+    try{const th=localStorage.getItem("jf_theme");if(th)setTheme(th);}catch(e){}
   },[]);
 
-  // Sync profile to data when pr changes (no Firebase write to avoid loops)
+  // Auto-save on page hide/unload
+  useEffect(()=>{
+    const handleHide=()=>{if(curUser){syncToCloud(data,curUser);}};
+    window.addEventListener("pagehide",handleHide);
+    window.addEventListener("beforeunload",handleHide);
+    return()=>{window.removeEventListener("pagehide",handleHide);window.removeEventListener("beforeunload",handleHide);};
+  },[curUser,data]);
+
+  // Auto-sync profile changes
   useEffect(()=>{
     if(!curUser) return;
-    setData(d=>({...d,profile:pr}));
+    const updated={...data,profile:pr};
+    setData(updated);
+    syncToCloud(updated,curUser);
   },[pr]);
+
+  const syncToCloud=(d,n)=>{
+    try{localStorage.setItem("jf_u_"+n,JSON.stringify(d));}catch(e){}
+    try{const db=getDB();if(db&&n)db.collection("userData").doc(n).set(d).catch(()=>{});}catch(e){}
+  };
 
   const saveUsers=(u)=>{
     setUsers(u);
     try{localStorage.setItem(USR_SK,JSON.stringify(u));}catch(e){}
-    try{
-      const db=getDB();
-      if(db) db.collection("users_index").doc("all").set({users:u}).catch(e=>console.warn("FB saveUsers:",e));
-    }catch(e){}
+    try{const db=getDB();if(db)db.collection("users_index").doc("all").set({users:u}).catch(()=>{});}catch(e){}
   };
-  const getUserKey=(name)=>`jf_u_${name}`;
-  const applyData=(p)=>{
-    setData(p);
-    if(p.profile)setPr(p.profile);
-    if(p.initM)setInitM(p.initM);
-    if(p.dayTypes)setDayTypes(p.dayTypes);
-    if(p.assessResult)setAssess(p.assessResult);
-    if(p.goalAiResult)setGAi(p.goalAiResult);
-    if(p.weeklyReport)setRep(p.weeklyReport);
-  };
+
+  const applyData=(p)=>{setData(p);if(p.profile)setPr(p.profile);if(p.initM)setInitM(p.initM);if(p.dayTypes)setDayTypes(p.dayTypes);if(p.assessResult)setAssess(p.assessResult);if(p.goalAiResult)setGAi(p.goalAiResult);if(p.weeklyReport)setRep(p.weeklyReport);};
+
   const loadUserData=(name)=>{
-    const resetData=()=>{setData(DEF_DATA);setPr(DEF_DATA.profile);setInitM(DEF_DATA.initM);setDayTypes({});setAssess(null);setGAi(null);setRep(null);};
-    const fromLS=()=>{try{const s=localStorage.getItem("jf_u_"+name);if(s){applyData(JSON.parse(s));return true;}}catch(e){}return false;};
-    
-    // Load from localStorage immediately (fast)
-    fromLS();
-    
-    // Then sync from Firestore (may update with newer cloud data)
-    try{
-      const db=getDB();
-      if(db){
-        db.collection("userData").doc(name).get()
-          .then(doc=>{
-            if(doc.exists&&doc.data()){
-              console.log("Loaded from Firestore");
-              applyData(doc.data());
-              try{localStorage.setItem("jf_u_"+name,JSON.stringify(doc.data()));}catch(e){}
-            }
-          })
-          .catch(e=>console.warn("FB load:",e));
-      }
-    }catch(e){console.warn("FB:",e);}
+    try{const s=localStorage.getItem("jf_u_"+name);if(s)applyData(JSON.parse(s));}catch(e){}
+    try{const db=getDB();if(db){db.collection("userData").doc(name).get().then(doc=>{if(doc.exists&&doc.data()){applyData(doc.data());try{localStorage.setItem("jf_u_"+name,JSON.stringify(doc.data()));}catch(e){}}}).catch(()=>{});}}catch(e){}
   };
-  const save=(next,uname)=>{
-    const n=uname||curUser;
-    setData(next);
-    // Save to localStorage (instant)
-    try{localStorage.setItem("jf_u_"+n,JSON.stringify(next));}catch(e){}
-    // Save to Firestore - strip large base64 photos to stay under 1MB limit
-    try{
-      const db=getDB();
-      if(db&&n){
-        const forCloud={...next};
-        // Remove base64 photos from cloud save (keep URL photos)
-        if(forCloud.initM&&forCloud.initM.photoUrl&&forCloud.initM.photoUrl.startsWith("data:")){
-          forCloud.initM={...forCloud.initM,photoUrl:""};
-        }
-        if(forCloud.photos){
-          forCloud.photos=forCloud.photos.filter(p=>!p.url||!p.url.startsWith("data:"));
-        }
-        const size=JSON.stringify(forCloud).length;
-        if(size<900000){
-          db.collection("userData").doc(n).set(forCloud)
-            .then(()=>console.log("Firestore OK",Math.round(size/1024)+"KB"))
-            .catch(e=>console.warn("FB:",e.message));
-        } else {
-          console.warn("Data too large for Firestore:",Math.round(size/1024)+"KB");
-        }
-      }
-    }catch(e){console.warn("FB:",e);}
-  };
+
+  const save=(next,uname)=>{const n=uname||curUser;setData(next);syncToCloud(next,n);};
   const msg=(m)=>{setToast(m);setTimeout(()=>setToast(""),2500);};
+  const getDT=(d)=>dayTypes[d]||"training";
+  const setDT=(d,t)=>{const n={...dayTypes,[d]:t};setDayTypes(n);save({...data,dayTypes:n});};
+
+  const sorted=[...data.entries].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const latest=sorted[sorted.length-1];
+  const mac=calcM(pr,latest?.weight,getDT(fDate));
+  const log=(data.foodLogs||{})[fDate]||[];
+  const tot=log.reduce((a,f)=>({k:a.k+(f.k||0),p:a.p+(f.p||0),c:a.c+(f.c||0),f:a.f+(f.f||0)}),{k:0,p:0,c:0,f:0});
+  const filt=srch.length>1?FDB.filter(f=>f.n.toLowerCase().includes(srch.toLowerCase())).slice(0,8):[];
+  const wk=getWk();
+  const CH=[{key:"weight",l:"Peso",dk:"P",c:"#E85D04"},{key:"bodyfat",l:"Grasa",dk:"G",c:"#EF233C"},{key:"waist",l:"Cintura",dk:"C",c:"#0096C7"},{key:"hips",l:"Cadera",dk:"Ca",c:"#6D28D9"},{key:"arms",l:"Biceps",dk:"B",c:"#457B9D"}];
+  const cData=sorted.map(e=>({f:fmt(e.date),P:parseFloat(e.weight)||null,G:parseFloat(e.bodyfat)||null,C:parseFloat(e.waist)||null,Ca:parseFloat(e.hips)||null,B:parseFloat(e.arms)||null}));
+  const cc=CH.find(x=>x.key===cht);
+  const O=T.acc,TC=T.acc2;
+  const cats=[...new Set(FDB.map(f=>f.cat))];
+
+  // Macro alerts
+  const getAlerts=()=>{
+    if(!mac) return [];
+    const alerts=[];
+    const carbLeft=mac.carb-tot.c;
+    const fatLeft=mac.fat-tot.f;
+    const protLeft=mac.prot-tot.p;
+    if(carbLeft>0&&carbLeft<=mac.carb*0.15) alerts.push({type:"warn",color:"#F4A261",icon:"🌾",msg:`Solo ${Math.round(carbLeft)}g de carbos restantes`,rec:"Considera una fruta pequeña o 1/4 taza de arroz"});
+    if(fatLeft>0&&fatLeft<=mac.fat*0.15) alerts.push({type:"warn",color:"#E85D04",icon:"🥑",msg:`Solo ${Math.round(fatLeft)}g de grasa restantes`,rec:"Evita aceites o frituras por el resto del día"});
+    if(tot.c>mac.carb) alerts.push({type:"over",color:"#EF233C",icon:"⚠️",msg:`Excediste carbos por ${Math.round(tot.c-mac.carb)}g`,rec:"Prioriza proteína y vegetales en tu próxima comida"});
+    if(tot.f>mac.fat) alerts.push({type:"over",color:"#EF233C",icon:"⚠️",msg:`Excediste grasas por ${Math.round(tot.f-mac.fat)}g`,rec:"Elige proteínas magras para cerrar el día"});
+    if(protLeft>20) alerts.push({type:"info",color:"#2DC653",icon:"💪",msg:`Faltan ${Math.round(protLeft)}g de proteína`,rec:protLeft>60?"Agrega una fuente de proteína en cada comida restante":"Un batido o yogur griego te ayuda a completarla"});
+    return alerts;
+  };
+
+  const aiCall=async(sys,usr,img=null)=>{
+    const content=img?[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:img}},{type:"text",text:usr}]:[{type:"text",text:usr}];
+    let r;
+    try{r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":getAPIKey(),"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,system:sys,messages:[{role:"user",content}]})});}
+    catch(netErr){throw new Error("Error de red: "+netErr.message);}
+    if(!r.ok){const t=await r.text();throw new Error("HTTP "+r.status+": "+t.substring(0,200));}
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message);
+    return(d.content||[]).map(b=>b.text||"").join("");
+  };
+
+  const aiCallJSON=async(sys,usr)=>{
+    const txt=await aiCall(sys,usr);
+    try{return JSON.parse(txt.replace(/```json|```/g,"").trim());}catch(e){}
+    const m=txt.match(/\{[\s\S]*\}/);
+    if(m){try{return JSON.parse(m[0]);}catch(e){}}
+    throw new Error("No se pudo leer la respuesta");
+  };
+
+  const doAI=async()=>{
+    if(!aiTxt.trim())return;setAiLd(true);setAiErr("");setAiPrv(null);
+    try{const r=await aiCallJSON('Eres nutricionista experto. Calcula macros PRECISOS usando tablas USDA. Para 1 huevo entero mediano usa exactamente: p=6.3g, c=0.6g, f=5g, kcal=72. Responde SOLO con JSON sin texto adicional. Formato: {"items":[{"name":"nombre","qty_description":"cantidad","qty_g":0,"protein":0,"carbs":0,"fat":0,"kcal":0}]}',`Analiza los macros de: ${aiTxt}`);setAiPrv(r.items||[]);}
+    catch(e){setAiErr(e.message||"Error");}
+    setAiLd(false);
+  };
+
+  const confirmAI=()=>{
+    if(!aiPrv)return;
+    const logs={...(data.foodLogs||{})};
+    const items=aiPrv.map(f=>({id:Date.now()+Math.random(),name:`${f.name} (${f.qty_description})`,k:parseFloat(f.kcal)||0,p:parseFloat(f.protein)||0,c:parseFloat(f.carbs)||0,f:parseFloat(f.fat)||0,meal:curMeal}));
+    logs[fDate]=[...(logs[fDate]||[]),...items];
+    // Save to favFoods
+    const favs=[...(data.favFoods||[])];
+    aiPrv.forEach(f=>{if(!favs.find(x=>x.n===f.name))favs.push({n:f.name,p:parseFloat(f.protein)||0,c:parseFloat(f.carbs)||0,f:parseFloat(f.fat)||0,k:parseFloat(f.kcal)||0,cat:"⭐"});});
+    save({...data,foodLogs:logs,favFoods:favs.slice(0,30)});
+    setAiPrv(null);setAiTxt("");msg(`✅ ${items.length} agregados a ${curMeal}`);
+  };
+
+  const addFood=()=>{
+    if(!sel)return;const g=parseFloat(qty)||100,r=g/100;
+    const logs={...(data.foodLogs||{})};
+    logs[fDate]=[...(logs[fDate]||[]),{id:Date.now(),name:sel.n,k:Math.round(sel.k*r),p:Math.round(sel.p*r*10)/10,c:Math.round(sel.c*r*10)/10,f:Math.round(sel.f*r*10)/10,meal:curMeal}];
+    save({...data,foodLogs:logs});setSel(null);setSrch("");setQty("100");msg("✅ Agregado a "+curMeal);
+  };
+
+  const addCu=()=>{
+    if(!cu.n)return;const g=parseFloat(cu.q)||100,r=g/100;
+    const p=parseFloat(cu.p)||0,c2=parseFloat(cu.c)||0,f=parseFloat(cu.f)||0,k=parseFloat(cu.k)||Math.round(p*4+c2*4+f*9);
+    const logs={...(data.foodLogs||{})};
+    logs[fDate]=[...(logs[fDate]||[]),{id:Date.now(),name:cu.n,k:Math.round(k*r),p:Math.round(p*r*10)/10,c:Math.round(c2*r*10)/10,f:Math.round(f*r*10)/10,meal:curMeal}];
+    save({...data,foodLogs:logs});setCu({n:"",p:"",c:"",f:"",k:"",q:"100"});msg("✅ Agregado");
+  };
+
+  const delF=(id)=>{const logs={...(data.foodLogs||{})};logs[fDate]=(logs[fDate]||[]).filter(x=>x.id!==id);save({...data,foodLogs:logs});};
+  const addE=()=>{if(!mF.date)return;save({...data,entries:[...data.entries,{...mF,id:Date.now()}]});setMF({date:today,weight:"",bodyfat:"",waist:"",hips:"",neck:"",chest:"",arms:"",note:""});msg("✅ Registro guardado");};
+
+  const saveWO=()=>{
+    const logs={...(data.workoutLogs||{})};logs[wDate]=[...(logs[wDate]||[]),{...wF,id:Date.now()}];
+    const nDT={...dayTypes,[wDate]:"training"};setDayTypes(nDT);
+    save({...data,workoutLogs:logs,dayTypes:nDT});
+    setWF({type:"Fuerza",duration:"",kcal:"",activeKcal:"",heartRate:"",aerobic:"",anaerobic:"",recovery:"",notes:"",exercises:[]});
+    msg("💪 Entrenamiento guardado");
+  };
+
+  const doRep=async()=>{
+    setRepLd(true);setRepErr("");
+    const ka=wk.map(d=>((data.foodLogs||{})[d]||[]).reduce((a,f)=>a+(f.k||0),0)).filter(Boolean);
+    const pa=wk.map(d=>((data.foodLogs||{})[d]||[]).reduce((a,f)=>a+(f.p||0),0)).filter(Boolean);
+    const tr=wk.filter(d=>getDT(d)==="training").length;
+    try{
+      const r=await aiCallJSON('Eres coach fitness. Responde SOLO con JSON. Formato: {"titulo":"","resumen":"","calificacion":"A","puntos_fuertes":[""],"areas_mejorar":[""],"nutricion":{"comentario":"","recomendacion":""},"entrenamiento":{"comentario":"","recomendacion":""},"reto_semana":"","mensaje_final":""}',
+        `${pr.sex==="female"?"Mujer":"Hombre"} ${pr.age}a, ${latest?.weight||pr.weight}kg. Entrenos: ${tr}/7. Kcal prom: ${ka.length?Math.round(ka.reduce((a,b)=>a+b)/ka.length):"?"} (meta:${mac?.kcal||"?"}). Prot prom: ${pa.length?Math.round(pa.reduce((a,b)=>a+b)/pa.length):"?"}g (meta:${mac?.prot||"?"}).`);
+      setRep(r);save({...data,weeklyReport:r});msg("📊 Reporte listo");
+    }catch(e){setRepErr(e.message||"Error");}
+    setRepLd(false);
+  };
+
+  const doAssess=async()=>{
+    const w=parseFloat(initM.weight||pr.weight),h=parseFloat(pr.height);
+    if(!w||!h||!pr.age)return;
+    setAssLd(true);setAssErr("");setAssess(null);
+    const bf=calcBF(pr.sex,h,initM.waist||"0",initM.hips||"0",initM.neck||"0");
+    const bfCat=bf?getBFCategory(bf,pr.sex):null;
+    try{
+      const imgData=initM.photoUrl?.startsWith("data:image")?initM.photoUrl.split(",")[1]:null;
+      const sys='Eres médico deportivo y nutricionista. Analiza el estado físico. Si hay imagen, analiza la composición corporal visible. Responde SOLO con JSON: {"titulo":"","nivel":"bueno","resumen":"","composicion_visual":"","fortalezas":[""],"areas_mejorar":[""],"prioridad":"","mensaje_motivador":""}';
+      const usr=`${pr.sex==="female"?"Mujer":"Hombre"} ${pr.age}a, ${w}kg, ${h}cm, IMC=${(w/Math.pow(h/100,2)).toFixed(1)}${bf?`, %Grasa=${bf}% (${bfCat?.l})`:""}. Objetivo: ${GA[pr.goal]?.l||"Definición"}.${imgData?" Analiza la composición corporal en la imagen.":""}`;
+      const r=await aiCallJSON(sys,usr,imgData);
+      setAssess({...r,bf,bfCat});
+      save({...data,assessResult:{...r,bf,bfCat},initM,profile:pr});
+      msg("✅ Análisis listo");
+    }catch(e){setAssErr(e.message||"Error");}
+    setAssLd(false);
+  };
+
+  const doGoals=async()=>{
+    if(!gObj||!pr.weight||!pr.height)return;setGAiLd(true);setGAiErr("");setGAi(null);
+    try{
+      const r=await aiCallJSON('Coach fitness. Responde SOLO con JSON: {"titulo":"","resumen":"","tiempo_estimado":"","metas":{"weight":null,"bodyfat":null,"waist":null},"plan_macros":"cut","consejos":[""],"semanas_control":4}',
+        `${pr.sex==="female"?"Mujer":"Hombre"},${pr.age}a,${pr.weight}kg,${pr.height}cm,Objetivo:${gObj}`);
+      setGAi(r);setPr(p=>({...p,goal:r.plan_macros}));
+      save({...data,profile:{...pr,goal:r.plan_macros},goalAiResult:r});
+      msg("🎯 Metas aplicadas");
+    }catch(e){setGAiErr(e.message||"Error");}
+    setGAiLd(false);
+  };
+
+  const doChat=async()=>{
+    if(!chatInput.trim())return;
+    const userMsg={role:"user",content:chatInput,ts:Date.now()};
+    const newHistory=[...(data.chatHistory||[]),userMsg];
+    save({...data,chatHistory:newHistory});
+    setChatInput("");setChatLd(true);
+    try{
+      const ctx=`Eres coach fitness y nutricionista personal de ${pr.name||"este usuario"}. 
+Perfil: ${pr.sex==="female"?"Mujer":"Hombre"} de ${pr.age} años, ${pr.weight}kg, ${pr.height}cm, objetivo: ${GA[pr.goal]?.l||"definición"}.
+Macros diarios: ${mac?.kcal||"?"} kcal, P:${mac?.prot||"?"}g, C:${mac?.carb||"?"}g, G:${mac?.fat||"?"}g.
+Responde en español, de forma cercana y motivadora. Da consejos prácticos y personalizados.`;
+      const msgs=newHistory.slice(-6).map(m=>({role:m.role,content:m.content}));
+      let r;
+      try{r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":getAPIKey(),"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,system:ctx,messages:msgs})});}
+      catch(e){throw new Error("Error de red");}
+      const d=await r.json();
+      const txt=(d.content||[]).map(b=>b.text||"").join("");
+      const aiMsg={role:"assistant",content:txt,ts:Date.now()};
+      const finalHistory=[...newHistory,aiMsg];
+      save({...data,chatHistory:finalHistory});
+    }catch(e){
+      const errMsg={role:"assistant",content:"Lo siento, hubo un error. Intenta de nuevo.",ts:Date.now()};
+      save({...data,chatHistory:[...newHistory,errMsg]});
+    }
+    setChatLd(false);
+    setTimeout(()=>chatEndRef.current?.scrollIntoView({behavior:"smooth"}),100);
+  };
 
   const doLogin=()=>{
     setLoginErr("");
@@ -380,148 +363,26 @@ function App(){
     const u=users[loginName.toLowerCase()];
     if(!u){setLoginErr("Usuario no encontrado");return;}
     if(u.passHash!==hash(loginPass)){setLoginErr("Contraseña incorrecta");return;}
-    setCurUser(loginName.toLowerCase());
-    loadUserData(loginName.toLowerCase());
-    setScreen("app");
-    setLoginName("");setLoginPass("");
+    setCurUser(loginName.toLowerCase());loadUserData(loginName.toLowerCase());setScreen("app");setLoginName("");setLoginPass("");
   };
+
   const doRegister=()=>{
     setRegErr("");
     if(!regName.trim()||!regPass.trim()||!regPass2.trim()){setRegErr("Completa todos los campos");return;}
     if(regPass!==regPass2){setRegErr("Las contraseñas no coinciden");return;}
-    if(regPass.length<4){setRegErr("La contraseña debe tener al menos 4 caracteres");return;}
+    if(regPass.length<4){setRegErr("Mínimo 4 caracteres");return;}
     const key=regName.toLowerCase().trim();
     if(users[key]){setRegErr("Ese nombre ya existe");return;}
     const newUsers={...users,[key]:{displayName:regName.trim(),passHash:hash(regPass),createdAt:today}};
-    saveUsers(newUsers);
-    setCurUser(key);
-    loadUserData(key);
-    setScreen("app");
-    setRegName("");setRegPass("");setRegPass2("");
-  };
-  const doLogout=()=>{if(curUser)save(data);setCurUser(null);setScreen("login");setData(DEF_DATA);setTab("comidas");};
-
-  // Auto-save on page close/hide/inactivity
-  useEffect(()=>{
-    const handleSave=()=>{if(curUser&&data)save(data);};
-    window.addEventListener("beforeunload",handleSave);
-    window.addEventListener("pagehide",handleSave);
-    document.addEventListener("visibilitychange",handleSave);
-    return()=>{
-      window.removeEventListener("beforeunload",handleSave);
-      window.removeEventListener("pagehide",handleSave);
-      document.removeEventListener("visibilitychange",handleSave);
-    };
-  },[data,curUser]);
-
-  const getDT=(d)=>dayTypes[d]||"training";
-  const setDT=(d,t)=>{const n={...dayTypes,[d]:t};setDayTypes(n);save({...data,dayTypes:n});};
-  const sorted=[...data.entries].sort((a,b)=>new Date(a.date)-new Date(b.date));
-  const latest=sorted[sorted.length-1];
-  const todayWorkouts=((data.workoutLogs||{})[fDate]||[]);
-  const todayWO=todayWorkouts.length>0?todayWorkouts[todayWorkouts.length-1]:null;
-  const mac=calcM(pr,latest?.weight,getDT(fDate),getDT(fDate)==="training"?todayWO:null);
-  const log=(data.foodLogs||{})[fDate]||[];
-  const tot=log.reduce((a,f)=>({k:a.k+(f.k||0),p:a.p+(f.p||0),c:a.c+(f.c||0),f:a.f+(f.f||0)}),{k:0,p:0,c:0,f:0});
-  const filt=srch.length>1?FDB.filter(f=>f.n.toLowerCase().includes(srch.toLowerCase())).slice(0,8):[];
-  const wk=getWk();
-  const CH=[{key:"weight",l:"Peso",dk:"P",c:"#E85D04"},{key:"bodyfat",l:"Grasa",dk:"G",c:"#EF233C"},{key:"waist",l:"Cintura",dk:"C",c:"#0096C7"},{key:"hips",l:"Cadera",dk:"Ca",c:"#6D6875"},{key:"arms",l:"Biceps",dk:"B",c:"#457B9D"}];
-  const cData=sorted.map(e=>({f:fmt(e.date),P:parseFloat(e.weight)||null,G:parseFloat(e.bodyfat)||null,C:parseFloat(e.waist)||null,Ca:parseFloat(e.hips)||null,B:parseFloat(e.arms)||null}));
-  const cc=CH.find(x=>x.key===cht);
-  const O=T.acc,TC=T.acc2;
-
-  const aiCall=async(sys,usr)=>{
-    let r;
-    try{r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":getAPIKey(),"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1200,system:sys,messages:[{role:"user",content:usr}]})});}
-    catch(netErr){throw new Error("Red: "+netErr.message);}
-    if(!r.ok){const t=await r.text();throw new Error("HTTP "+r.status+": "+t.substring(0,300));}
-    const d=await r.json();
-    if(d.error) throw new Error(d.error.message||JSON.stringify(d.error));
-    const txt=(d.content||[]).map(b=>b.text||"").join("");
-    try{return JSON.parse(txt.replace(/```json|```/g,"").trim());}catch(e1){}
-    const m=txt.match(/\{[\s\S]*\}/);
-    if(m){try{return JSON.parse(m[0]);}catch(e2){}}
-    throw new Error("No se pudo leer la respuesta");
-  };
-  const doAI=async()=>{
-    if(!aiTxt.trim())return;setAiLd(true);setAiErr("");setAiPrv(null);
-    try{const r=await aiCall('Eres nutricionista experto. Calcula macros con PRECISION usando valores reales de tablas nutricionales (USDA/FoodData). Para huevos enteros usa: 1 huevo mediano=50g, 6g proteina, 5g grasa, 0.6g carbs, 72kcal. Para huevos grandes=60g, 7g prot, 5g grasa. Responde SOLO con JSON valido sin texto adicional. Formato: {"items":[{"name":"nombre alimento","qty_description":"cantidad descripcion","qty_g":0,"protein":0,"carbs":0,"fat":0,"kcal":0}]}',`Analiza los macros de: ${aiTxt}`);setAiPrv(r.items||[]);}
-    catch(e){setAiErr(e.message||"Error desconocido");}
-    setAiLd(false);
-  };
-  const confirmAI=()=>{
-    if(!aiPrv)return;
-    const logs={...(data.foodLogs||{})};
-    logs[fDate]=[...(logs[fDate]||[]),...aiPrv.map(f=>({id:Date.now()+Math.random(),name:`${f.name} (${f.qty_description})`,k:parseFloat(f.kcal)||0,p:parseFloat(f.protein)||0,c:parseFloat(f.carbs)||0,f:parseFloat(f.fat)||0,meal:mealType}))];
-    save({...data,foodLogs:logs});setAiPrv(null);setAiTxt("");msg(`Agregados ${aiPrv.length} alimentos`);
-  };
-  const addFood=()=>{
-    if(!sel)return;const g=parseFloat(qty)||100,r=g/100;
-    const logs={...(data.foodLogs||{})};
-    const item={id:Date.now(),name:sel.n,k:Math.round(sel.k*r),p:Math.round(sel.p*r*10)/10,c:Math.round(sel.c*r*10)/10,f:Math.round(sel.f*r*10)/10,meal:mealType};
-    logs[fDate]=[...(logs[fDate]||[]),item];
-    save({...data,foodLogs:logs});setSel(null);setSrch("");setQty("100");msg("Agregado");
-  };
-  const addCu=()=>{
-    if(!cu.n)return;const g=parseFloat(cu.q)||100,r=g/100;
-    const p=parseFloat(cu.p)||0,c2=parseFloat(cu.c)||0,f=parseFloat(cu.f)||0,k=parseFloat(cu.k)||Math.round(p*4+c2*4+f*9);
-    const logs={...(data.foodLogs||{})};
-    logs[fDate]=[...(logs[fDate]||[]),{id:Date.now(),name:cu.n,k:Math.round(k*r),p:Math.round(p*r*10)/10,c:Math.round(c2*r*10)/10,f:Math.round(f*r*10)/10,meal:mealType}];
-    save({...data,foodLogs:logs});setCu({n:"",p:"",c:"",f:"",k:"",q:"100"});msg("Agregado");
-  };
-  const delF=(id)=>{const logs={...(data.foodLogs||{})};logs[fDate]=(logs[fDate]||[]).filter(x=>x.id!==id);save({...data,foodLogs:logs});};
-  const addE=()=>{if(!mF.date)return;save({...data,entries:[...data.entries,{...mF,id:Date.now()}]});setMF({date:today,weight:"",bodyfat:"",waist:"",hips:"",neck:"",chest:"",arms:"",note:""});msg("Registro guardado");};
-  const addEx=()=>{if(!exI.name)return;setWF(w=>({...w,exercises:[...w.exercises,{...exI,id:Date.now()}]}));setExI({name:"",sets:"",reps:"",weight:"",distance:""});setShowEx(false);};
-  const saveWO=()=>{
-    const logs={...(data.workoutLogs||{})};logs[wDate]=[...(logs[wDate]||[]),{...wF,id:Date.now()}];
-    const nDT={...dayTypes,[wDate]:"training"};setDayTypes(nDT);
-    save({...data,workoutLogs:logs,dayTypes:nDT});
-    setWF({type:"Fuerza",duration:"",kcal:"",activeKcal:"",heartRate:"",aerobic:"",anaerobic:"",recovery:"",notes:"",exercises:[]});
-    msg("Entrenamiento guardado");
-  };
-  const doRep=async()=>{
-    setRepLd(true);setRepErr("");
-    const ka=wk.map(d=>((data.foodLogs||{})[d]||[]).reduce((a,f)=>a+(f.k||0),0)).filter(Boolean);
-    const pa=wk.map(d=>((data.foodLogs||{})[d]||[]).reduce((a,f)=>a+(f.p||0),0)).filter(Boolean);
-    const tr=wk.filter(d=>getDT(d)==="training").length;
-    try{
-      const r=await aiCall('Eres coach fitness. Responde UNICAMENTE con JSON valido. Formato: {"titulo":"","resumen":"","calificacion":"A","puntos_fuertes":[""],"areas_mejorar":[""],"nutricion":{"comentario":"","recomendacion":""},"entrenamiento":{"comentario":"","recomendacion":""},"reto_semana":"","mensaje_final":""}',
-        `${pr.sex==="female"?"Mujer":"Hombre"} ${pr.age}a, ${latest?.weight||pr.weight}kg. Entrenos: ${tr}/7. Kcal prom: ${ka.length?Math.round(ka.reduce((a,b)=>a+b)/ka.length):"?"} (meta:${mac?.kcal||"?"}). Prot prom: ${pa.length?Math.round(pa.reduce((a,b)=>a+b)/pa.length):"?"}g (meta:${mac?.prot||"?"}).`);
-      setRep(r);save({...data,weeklyReport:r});msg("Reporte listo");
-    }catch(e){setRepErr(e.message||"Error desconocido");}
-    setRepLd(false);
-  };
-  const doAssess=async()=>{
-    const w=parseFloat(initM.weight||pr.weight),h=parseFloat(pr.height);
-    if(!w||!h||!pr.age)return;setAssLd(true);setAssErr("");setAssess(null);
-    try{
-      const r=await aiCall('Medico deportivo. Responde UNICAMENTE con JSON. Formato: {"titulo":"","nivel":"bueno","resumen":"","fortalezas":[""],"areas_mejorar":[""],"prioridad":"","mensaje_motivador":""}',
-        `${pr.sex==="female"?"Mujer":"Hombre"} ${pr.age}a, ${w}kg, ${h}cm, IMC=${(w/Math.pow(h/100,2)).toFixed(1)}`);
-      setAssess(r);save({...data,assessResult:r,initM,profile:pr});msg("Analisis listo");
-    }catch(e){setAssErr(e.message||"Error desconocido");}
-    setAssLd(false);
-  };
-  const doGoals=async()=>{
-    if(!gObj||!pr.weight||!pr.height)return;setGAiLd(true);setGAiErr("");setGAi(null);
-    try{
-      const r=await aiCall('Coach fitness. Responde UNICAMENTE con JSON. Formato: {"titulo":"","resumen":"","tiempo_estimado":"","metas":{"weight":null,"bodyfat":null,"waist":null},"plan_macros":"cut","consejos":[""],"semanas_control":4}',
-        `${pr.sex==="female"?"Mujer":"Hombre"},${pr.age}a,${pr.weight}kg,${pr.height}cm,Objetivo:${gObj}`);
-      setGAi(r);setPr(p=>({...p,goal:r.plan_macros}));save({...data,profile:{...pr,goal:r.plan_macros},goalAiResult:r});msg("Metas aplicadas");
-    }catch(e){setGAiErr(e.message||"Error desconocido");}
-    setGAiLd(false);
+    saveUsers(newUsers);setCurUser(key);loadUserData(key);setScreen("app");setRegName("");setRegPass("");setRegPass2("");
   };
 
-  const cats=[...new Set(FDB.map(f=>f.cat))];
+  const doLogout=()=>{if(curUser)syncToCloud(data,curUser);setCurUser(null);setScreen("login");setData(DEF_DATA);setTab("comidas");};
 
   const CSS=`
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bebas+Neue&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:${T.bg};--card:${T.card};--card2:${T.card2};--brd:${T.brd};
-  --txt:${T.txt};--txt2:${T.txt2};--txt3:${T.txt3};
-  --acc:${T.acc};--acc2:${T.acc2};--ring-bg:${T.ringBg};
-  --inp:${T.inp};--inp-brd:${T.inpBrd};
-}
+:root{--bg:${T.bg};--card:${T.card};--card2:${T.card2};--brd:${T.brd};--txt:${T.txt};--txt2:${T.txt2};--txt3:${T.txt3};--acc:${T.acc};--acc2:${T.acc2};--ring-bg:${T.ringBg};--inp:${T.inp};--inp-brd:${T.inpBrd};}
 body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif}
 input,select,textarea,button{font-family:'Inter',sans-serif;color:var(--txt)}
 .inp{background:var(--inp);border:1.5px solid var(--inp-brd);border-radius:12px;padding:12px 14px;color:var(--txt);font-size:14px;width:100%;outline:none;transition:border .2s}
@@ -538,7 +399,7 @@ textarea.inp{resize:vertical;line-height:1.6}
 .bdg{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:12px 24px;font-size:14px;font-weight:600;z-index:9999;animation:pi .3s ease;pointer-events:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.15)}
 @keyframes pi{from{opacity:0;transform:translateX(-50%) scale(.85)}to{opacity:1;transform:translateX(-50%) scale(1)}}
-.tab{background:none;border:none;cursor:pointer;padding:11px 12px;font-size:11px;font-weight:700;color:var(--txt3);border-bottom:2px solid transparent;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
+.tab{background:none;border:none;cursor:pointer;padding:11px 10px;font-size:10px;font-weight:700;color:var(--txt3);border-bottom:2px solid transparent;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
 .tab.on{color:var(--acc);border-bottom-color:var(--acc)}
 .ttl{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--txt);margin-bottom:4px}
 .sub{font-size:12px;color:var(--txt3);margin-bottom:18px}
@@ -554,21 +415,22 @@ textarea.inp{resize:vertical;line-height:1.6}
 .uzn{border:2px dashed var(--brd);border-radius:16px;padding:28px 20px;text-align:center;cursor:pointer;background:var(--card)}
 .thmbtn{padding:8px 16px;border-radius:20px;border:2px solid var(--brd);background:var(--card);cursor:pointer;font-weight:700;font-size:12px;color:var(--txt3);transition:all .2s}
 .thmbtn.on{border-color:var(--acc);color:var(--acc);background:var(--card2)}
+.meal-header{background:var(--card2);border-radius:12px;padding:8px 14px;margin:14px 0 6px;display:flex;align-items:center;justify-content:space-between;border-left:3px solid var(--acc)}
+.chat-bubble-user{background:var(--acc);color:#fff;border-radius:18px 18px 4px 18px;padding:12px 16px;margin:4px 0;max-width:85%;align-self:flex-end;font-size:14px;line-height:1.5}
+.chat-bubble-ai{background:var(--card2);color:var(--txt);border-radius:18px 18px 18px 4px;padding:12px 16px;margin:4px 0;max-width:85%;align-self:flex-start;font-size:14px;line-height:1.5;border:1px solid var(--brd)}
 `;
 
-  // ===== LOGIN SCREEN =====
+  // LOGIN
   if(screen==="login"){
     const doRecover=()=>{
       setRecErr("");
       if(!recUser.trim()){setRecErr("Ingresa tu usuario");return;}
       const u=users[recUser.toLowerCase().trim()];
       if(!u){setRecErr("Usuario no encontrado");return;}
-      if(!recNewPass||recNewPass.length<4){setRecErr("La contrasena debe tener al menos 4 caracteres");return;}
-      if(recNewPass!==recNewPass2){setRecErr("Las contrasenas no coinciden");return;}
+      if(!recNewPass||recNewPass.length<4){setRecErr("Mínimo 4 caracteres");return;}
+      if(recNewPass!==recNewPass2){setRecErr("Las contraseñas no coinciden");return;}
       const updated={...users,[recUser.toLowerCase().trim()]:{...u,passHash:hash(recNewPass)}};
-      saveUsers(updated);
-      setScreen2("login");setRecUser("");setRecNewPass("");setRecNewPass2("");
-      msg("Contrasena actualizada");
+      saveUsers(updated);setScreen2("login");setRecUser("");setRecNewPass("");setRecNewPass2("");msg("✅ Contraseña actualizada");
     };
     return(
     React.createElement('div', { style: {fontFamily:"Inter,sans-serif",minHeight:"100vh",background:T.bg,color:T.txt,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}
@@ -579,33 +441,32 @@ textarea.inp{resize:vertical;line-height:1.6}
       , screen2==="login"?React.createElement('div', { style: {width:"100%",maxWidth:380}}
         , loginErr&&React.createElement('div', { style: {background:"#EF233C22",border:"1px solid #EF233C44",borderRadius:12,padding:"10px 14px",fontSize:13,color:"#EF233C",marginBottom:14}}, loginErr)
         , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Usuario"), React.createElement('input', { className: "inp", placeholder: "Tu nombre" , value: loginName, onChange: e=>setLoginName(e.target.value), onKeyDown: e=>e.key==="Enter"&&doLogin()}))
-        , React.createElement('div', { style: {marginBottom:6}}, React.createElement('div', { className: "lbl"}, "Contrasena")
+        , React.createElement('div', { style: {marginBottom:6}}, React.createElement('div', { className: "lbl"}, "Contraseña")
           , React.createElement('div', { style: {position:"relative"}}
-            , React.createElement('input', { className: "inp", type: showLoginPass?"text":"password", placeholder: "Tu contrasena" , value: loginPass, onChange: e=>setLoginPass(e.target.value), onKeyDown: e=>e.key==="Enter"&&doLogin(), style: {paddingRight:44}})
+            , React.createElement('input', { className: "inp", type: showLoginPass?"text":"password", placeholder: "Tu contraseña" , value: loginPass, onChange: e=>setLoginPass(e.target.value), onKeyDown: e=>e.key==="Enter"&&doLogin(), style: {paddingRight:44}})
             , React.createElement('button', { onClick: ()=>setShowLoginPass(p=>!p), style: {position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:18,color:T.txt3}}, showLoginPass?"🙈":"👁️")
           )
         )
-        , React.createElement('div', { style: {textAlign:"right",marginBottom:20}}, React.createElement('button', { onClick: ()=>{setScreen2("recover");setRecErr("");}, style: {background:"none",border:"none",cursor:"pointer",fontSize:12,color:O,fontWeight:600}}, "Olvide mi contrasena"  ))
+        , React.createElement('div', { style: {textAlign:"right",marginBottom:20}}, React.createElement('button', { onClick: ()=>{setScreen2("recover");setRecErr("");}, style: {background:"none",border:"none",cursor:"pointer",fontSize:12,color:O,fontWeight:600}}, "Olvidé mi contraseña"  ))
         , React.createElement('button', { className: "btn", onClick: doLogin, style: {marginBottom:12}}, "Entrar")
         , React.createElement('button', { className: "bg", style: {width:"100%"}, onClick: ()=>{setScreen("register");setLoginErr("");}}, "Crear cuenta nueva"  )
       ):React.createElement('div', { style: {width:"100%",maxWidth:380}}
-        , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:24,letterSpacing:2,marginBottom:6}}, "RECUPERAR CONTRASENA" )
-        , React.createElement('div', { style: {fontSize:13,color:T.txt3,marginBottom:20}}, "Ingresa tu usuario y define una nueva contrasena"       )
+        , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:24,letterSpacing:2,marginBottom:16}}, "RECUPERAR CONTRASEÑA" )
         , recErr&&React.createElement('div', { style: {background:"#EF233C22",border:"1px solid #EF233C44",borderRadius:12,padding:"10px 14px",fontSize:13,color:"#EF233C",marginBottom:14}}, recErr)
         , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Usuario"), React.createElement('input', { className: "inp", placeholder: "Tu nombre de usuario"   , value: recUser, onChange: e=>setRecUser(e.target.value)}))
-        , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Nueva contrasena" )
+        , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Nueva contraseña" )
           , React.createElement('div', { style: {position:"relative"}}
-            , React.createElement('input', { className: "inp", type: showRecPass?"text":"password", placeholder: "Minimo 4 caracteres"  , value: recNewPass, onChange: e=>setRecNewPass(e.target.value), style: {paddingRight:44}})
+            , React.createElement('input', { className: "inp", type: showRecPass?"text":"password", placeholder: "Mínimo 4 caracteres"  , value: recNewPass, onChange: e=>setRecNewPass(e.target.value), style: {paddingRight:44}})
             , React.createElement('button', { onClick: ()=>setShowRecPass(p=>!p), style: {position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:18,color:T.txt3}}, showRecPass?"🙈":"👁️")
           )
         )
-        , React.createElement('div', { style: {marginBottom:20}}, React.createElement('div', { className: "lbl"}, "Confirmar nueva contrasena"  ), React.createElement('input', { className: "inp", type: "password", placeholder: "Repite la nueva contrasena"   , value: recNewPass2, onChange: e=>setRecNewPass2(e.target.value)}))
-        , React.createElement('button', { className: "btn", onClick: doRecover, style: {marginBottom:12}}, "Guardar nueva contrasena"  )
-        , React.createElement('button', { className: "bg", style: {width:"100%"}, onClick: ()=>{setScreen2("login");setRecErr("");}}, "Volver al login"  )
+        , React.createElement('div', { style: {marginBottom:20}}, React.createElement('div', { className: "lbl"}, "Confirmar"), React.createElement('input', { className: "inp", type: "password", value: recNewPass2, onChange: e=>setRecNewPass2(e.target.value)}))
+        , React.createElement('button', { className: "btn", onClick: doRecover, style: {marginBottom:12}}, "Guardar contraseña" )
+        , React.createElement('button', { className: "bg", style: {width:"100%"}, onClick: ()=>{setScreen2("login");setRecErr("");}}, "Volver")
       )
       , toast&&React.createElement('div', { className: "toast"}, toast)
-    )
-  );}
+    ));
+  }
 
   if(screen==="register"){return(
     React.createElement('div', { style: {fontFamily:"Inter,sans-serif",minHeight:"100vh",background:T.bg,color:T.txt,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}
@@ -614,43 +475,42 @@ textarea.inp{resize:vertical;line-height:1.6}
       , React.createElement('div', { style: {width:"100%",maxWidth:380}}
         , regErr&&React.createElement('div', { style: {background:"#EF233C22",border:"1px solid #EF233C44",borderRadius:12,padding:"10px 14px",fontSize:13,color:"#EF233C",marginBottom:14}}, regErr)
         , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Nombre de usuario"  ), React.createElement('input', { className: "inp", placeholder: "ej: Juli, Carlos..."  , value: regName, onChange: e=>setRegName(e.target.value)}))
-        , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Contrasena")
+        , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Contraseña")
           , React.createElement('div', { style: {position:"relative"}}
-            , React.createElement('input', { className: "inp", type: showRegPass?"text":"password", placeholder: "Minimo 4 caracteres"  , value: regPass, onChange: e=>setRegPass(e.target.value), style: {paddingRight:44}})
+            , React.createElement('input', { className: "inp", type: showRegPass?"text":"password", placeholder: "Mínimo 4 caracteres"  , value: regPass, onChange: e=>setRegPass(e.target.value), style: {paddingRight:44}})
             , React.createElement('button', { onClick: ()=>setShowRegPass(p=>!p), style: {position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:18,color:T.txt3}}, showRegPass?"🙈":"👁️")
           )
         )
-        , React.createElement('div', { style: {marginBottom:20}}, React.createElement('div', { className: "lbl"}, "Confirmar contrasena" )
+        , React.createElement('div', { style: {marginBottom:20}}, React.createElement('div', { className: "lbl"}, "Confirmar")
           , React.createElement('div', { style: {position:"relative"}}
-            , React.createElement('input', { className: "inp", type: showRegPass2?"text":"password", placeholder: "Repite la contrasena"  , value: regPass2, onChange: e=>setRegPass2(e.target.value), style: {paddingRight:44}})
+            , React.createElement('input', { className: "inp", type: showRegPass2?"text":"password", placeholder: "Repite", value: regPass2, onChange: e=>setRegPass2(e.target.value), style: {paddingRight:44}})
             , React.createElement('button', { onClick: ()=>setShowRegPass2(p=>!p), style: {position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:18,color:T.txt3}}, showRegPass2?"🙈":"👁️")
           )
         )
         , React.createElement('button', { className: "btn", onClick: doRegister, style: {marginBottom:12}}, "Crear cuenta" )
         , React.createElement('button', { className: "bg", style: {width:"100%"}, onClick: ()=>{setScreen("login");setRegErr("");}}, "Ya tengo cuenta"  )
       )
-    )
-  );}
+    ));}
 
-  // ===== MAIN APP =====
+  const alerts=getAlerts();
+
   return(
     React.createElement('div', { style: {fontFamily:"Inter,sans-serif",minHeight:"100vh",background:T.bg,color:T.txt,maxWidth:480,margin:"0 auto"}}
       , React.createElement('style', {}, CSS)
-
       , React.createElement('div', { style: {background:T.card,borderBottom:`1px solid ${T.brd}`,padding:"0 14px",position:"sticky",top:0,zIndex:100,boxShadow:theme==="light"?"0 1px 8px rgba(0,0,0,0.08)":"none"}}
         , React.createElement('div', { style: {paddingTop:10,display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}
-          , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:10}}
-            , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,letterSpacing:3,color:O}}, "JULYFIT")
-            , React.createElement('div', { style: {fontSize:12,fontWeight:700,color:T.txt3}}, "• " , pr.name||curUser)
-          )
           , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:8}}
+            , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,letterSpacing:3,color:O}}, "JULYFIT")
+            , React.createElement('div', { style: {fontSize:11,fontWeight:700,color:T.txt3}}, "• " , pr.name||curUser)
+          )
+          , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6}}
             , mac&&React.createElement('span', { style: {fontSize:11,color:O,fontWeight:700,background:O+"18",padding:"3px 8px",borderRadius:8,border:`1px solid ${O}33`}}, mac.kcal, " kcal" )
-            , React.createElement('button', { onClick: ()=>setTheme(t=>t==="dark"?"light":"dark"), style: {background:T.card2,border:`1px solid ${T.brd}`,borderRadius:20,padding:"4px 10px",cursor:"pointer",fontSize:14}}, theme==="dark"?"☀️":"🌙")
-            , React.createElement('button', { onClick: doLogout, style: {background:T.card2,border:`1px solid ${T.brd}`,borderRadius:20,padding:"4px 10px",cursor:"pointer",fontSize:11,color:T.txt3,fontWeight:700}}, "Salir")
+            , React.createElement('button', { onClick: ()=>{setTheme(t=>{const nt=t==="dark"?"light":"dark";localStorage.setItem("jf_theme",nt);return nt;})}, style: {background:T.card2,border:`1px solid ${T.brd}`,borderRadius:20,padding:"4px 8px",cursor:"pointer",fontSize:14}}, theme==="dark"?"☀️":"🌙")
+            , React.createElement('button', { onClick: doLogout, style: {background:T.card2,border:`1px solid ${T.brd}`,borderRadius:20,padding:"4px 8px",cursor:"pointer",fontSize:11,color:T.txt3,fontWeight:700}}, "Salir")
           )
         )
         , React.createElement('div', { style: {display:"flex",overflowX:"auto"}}
-          , [["comidas","🍽 Comidas"],["entrena","💪 Entrena"],["medidas","📏 Medidas"],["reporte","📊 Reporte"],["perfil","👤 Perfil"]].map(([v,l])=>(
+          , [["comidas","🍽 Comidas"],["entrena","💪 Entrena"],["medidas","📏 Medidas"],["reporte","📊 Reporte"],["chat","🤖 Coach IA"],["fotos","📸 Fotos"],["perfil","👤 Perfil"]].map(([v,l])=>(
             React.createElement('button', { key: v, className: `tab ${tab===v?"on":""}`, onClick: ()=>setTab(v)}, l)
           ))
         )
@@ -660,12 +520,14 @@ textarea.inp{resize:vertical;line-height:1.6}
 
       , tab==="comidas"&&React.createElement('div', {}
         , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:14,gap:8,flexWrap:"wrap"}}
-          , React.createElement('div', {}, React.createElement('div', { className: "ttl"}, "COMIDAS"), React.createElement('div', { className: "sub"}, "Registro del dia"  ))
+          , React.createElement('div', {}, React.createElement('div', { className: "ttl"}, "COMIDAS"), React.createElement('div', { className: "sub"}, "Registro del día"  ))
           , React.createElement('input', { className: "inp", type: "date", value: fDate, onChange: e=>setFDate(e.target.value), style: {width:"auto",fontSize:12,padding:"8px 12px"}})
         )
+
+        /* Tipo de día */
         , React.createElement('div', { className: "card"}
-          , React.createElement('div', { className: "lbl", style: {marginBottom:10}}, "Tipo de dia"  )
-          , React.createElement('div', { style: {display:"flex",gap:8,marginBottom:10}}
+          , React.createElement('div', { className: "lbl", style: {marginBottom:10}}, "Tipo de día"  )
+          , React.createElement('div', { style: {display:"flex",gap:8}}
             , Object.entries(DT).map(([k,v])=>(
               React.createElement('button', { key: k, className: "dc", onClick: ()=>setDT(fDate,k), style: {borderColor:getDT(fDate)===k?v.c:T.brd,background:getDT(fDate)===k?v.c+"22":T.card,flex:1}}
                 , React.createElement('div', { style: {fontSize:24,marginBottom:4}}, v.l.split(" ")[0])
@@ -673,16 +535,18 @@ textarea.inp{resize:vertical;line-height:1.6}
               )
             ))
           )
-          , getDT(fDate)!=="normal"&&React.createElement('div', { style: {fontSize:12,color:DT[getDT(fDate)].c,background:DT[getDT(fDate)].c+"11",borderRadius:10,padding:"8px 12px",fontWeight:500}}, DT[getDT(fDate)].tip)
+          , getDT(fDate)&&React.createElement('div', { style: {fontSize:12,color:DT[getDT(fDate)].c,background:DT[getDT(fDate)].c+"11",borderRadius:10,padding:"8px 12px",marginTop:10,fontWeight:500}}, DT[getDT(fDate)].tip)
         )
+
+        /* Macros del día */
         , mac&&React.createElement('div', { className: "card"}
           , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}
             , React.createElement('div', {}, React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase"}}, "Consumido"), React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:40,color:tot.k>mac.kcal?"#EF233C":O,letterSpacing:1,lineHeight:1.1}}, Math.round(tot.k), React.createElement('span', { style: {fontSize:16,color:T.txt3}}, " kcal" )))
             , React.createElement('div', { style: {textAlign:"right"}}, React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase"}}, "Restante"), React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:40,color:tot.k>mac.kcal?"#EF233C":TC,letterSpacing:1,lineHeight:1.1}}, tot.k>mac.kcal?"+"+Math.round(tot.k-mac.kcal):Math.round(mac.kcal-tot.k), React.createElement('span', { style: {fontSize:16,color:T.txt3}}, " kcal" )))
           )
-          , React.createElement(PBar, { val: tot.k, max: mac.kcal, color: mac.g.c, h: 10})
+          , React.createElement(PBar, { val: tot.k, max: mac.kcal, color: O, h: 10})
           , React.createElement('div', { style: {display:"flex",gap:8,marginTop:14}}
-            , [{l:"Proteina",e:tot.p,t:mac.prot,c:"#EF233C"},{l:"Carbos",e:tot.c,t:mac.carb,c:"#F4A261"},{l:"Grasa",e:tot.f,t:mac.fat,c:TC}].map(m=>(
+            , [{l:"Proteína",e:tot.p,t:mac.prot,c:"#EF233C"},{l:"Carbos",e:tot.c,t:mac.carb,c:"#F4A261"},{l:"Grasa",e:tot.f,t:mac.fat,c:TC}].map(m=>(
               React.createElement('div', { key: m.l, style: {flex:1,textAlign:"center"}}
                 , React.createElement(Ring, { pct: m.t>0?m.e/m.t*100:0, size: 60, stroke: 5, color: m.c}, React.createElement('span', { style: {fontSize:10,fontWeight:800,color:T.txt}}, Math.round(m.e), "g"))
                 , React.createElement('div', { style: {fontSize:9,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginTop:4}}, m.l)
@@ -691,63 +555,68 @@ textarea.inp{resize:vertical;line-height:1.6}
             ))
           )
         )
+
+        /* Alertas de macros */
+        , alerts.length>0&&React.createElement('div', { style: {marginBottom:12}}
+          , alerts.map((a,i)=>(
+            React.createElement('div', { key: i, style: {background:a.color+"15",border:`1px solid ${a.color}44`,borderRadius:12,padding:"10px 14px",marginBottom:8}}
+              , React.createElement('div', { style: {fontSize:13,fontWeight:700,color:a.color,marginBottom:4}}, a.icon, " " , a.msg)
+              , React.createElement('div', { style: {fontSize:12,color:T.txt3}}, "💡 " , a.rec)
+            )
+          ))
+        )
+
+        /* Selector de comida */
         , React.createElement('div', { className: "card"}
-          , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}
-            , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase"}}, "+ Agregar alimento"  )
-          )
           , React.createElement('div', { style: {marginBottom:12}}
-            , React.createElement('div', { className: "lbl", style: {marginBottom:6}}, "Para")
-            , React.createElement('div', { style: {display:"flex",gap:6,overflowX:"auto"}}
-              , MEALS.map(m=>React.createElement('button', { key: m.v, className: `pl ${mealType===m.v?"on":""}`, onClick: ()=>setMealType(m.v), style: {flexShrink:0}}, m.l))
+            , React.createElement('div', { className: "lbl", style: {marginBottom:8}}, "¿Para qué comida?"  )
+            , React.createElement('div', { style: {display:"flex",gap:6,flexWrap:"wrap"}}
+              , MEALS.map(m=>React.createElement('button', { key: m, className: `pl ${curMeal===m?"on":""}`, onClick: ()=>setCurMeal(m)}, m))
             )
           )
+          , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:12}}, "+ Agregar a "   , curMeal)
           , React.createElement('div', { style: {display:"flex",gap:6,marginBottom:12}}
-            , [["ai","🤖 IA"],["search","🔍 Buscar"],["manual","✏️ Manual"]].map(([v,l])=>(
-              React.createElement('button', { key: v, className: `mt ${mode===v?"on":""}`, onClick: ()=>{setMode(v);setAiPrv(null);setAiErr("");}}, l)
+            , [["ai","🤖 IA"],["search","🔍 Buscar"],["manual","✏️ Manual"],["favs","⭐ Favoritos"]].map(([v,l])=>(
+              React.createElement('button', { key: v, className: `mt ${mode===v?"on":""}`, onClick: ()=>{setMode(v);setAiPrv(null);setAiErr("");}, style: {fontSize:11}}, l)
             ))
           )
+
           , mode==="ai"&&React.createElement('div', {}
-            , React.createElement('textarea', { className: "inp", rows: 3, placeholder: "ej: 3 huevos cocidos, 83g de arepa y cafe con leche"          , value: aiTxt, onChange: e=>setAiTxt(e.target.value), style: {marginBottom:10}})
-            , React.createElement('button', { className: "btn", onClick: doAI, disabled: aiLd||!aiTxt.trim()}, aiLd?"Analizando...":"Calcular macros con IA")
+            , React.createElement('textarea', { className: "inp", rows: 3, placeholder: "ej: 3 huevos cocidos, 83g de arepa y café con leche"          , value: aiTxt, onChange: e=>setAiTxt(e.target.value), style: {marginBottom:10}})
+            , React.createElement('button', { className: "btn", onClick: doAI, disabled: aiLd||!aiTxt.trim()}, aiLd?"⏳ Analizando...":"✨ Calcular macros con IA")
             , aiErr&&React.createElement('div', { style: {marginTop:10,background:"#EF233C18",border:"1px solid #EF233C33",borderRadius:12,padding:"10px 14px",fontSize:12,color:"#EF233C"}}, aiErr)
             , aiPrv&&React.createElement('div', { style: {marginTop:14}}
-              , React.createElement('div', { style: {fontSize:11,color:TC,fontWeight:700,textTransform:"uppercase",marginBottom:12}}, "Confirma " , aiPrv.length, " alimentos:" )
+              , React.createElement('div', { style: {fontSize:11,color:TC,fontWeight:700,textTransform:"uppercase",marginBottom:12}}, "✅ " , aiPrv.length, " alimentos — confirma:"   )
               , aiPrv.map((f,i)=>(
                 React.createElement('div', { key: i, style: {background:T.card2,borderRadius:16,padding:14,marginBottom:10,border:`1px solid ${editIdx===i?O:T.brd}`}}
                   , editIdx===i?(
                     React.createElement('div', {}
-                      , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,marginBottom:10}}, "Editando: " , f.name)
+                      , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,marginBottom:10}}, "✏️ Editando: "  , f.name)
                       , React.createElement('div', { style: {marginBottom:8}}, React.createElement('div', { className: "lbl"}, "Nombre"), React.createElement('input', { className: "inp", style: {fontSize:13}, value: editF.name, onChange: e=>setEditF({...editF,name:e.target.value})}))
                       , React.createElement('div', { style: {marginBottom:8}}, React.createElement('div', { className: "lbl"}, "Cantidad"), React.createElement('input', { className: "inp", style: {fontSize:13}, value: editF.qty_description, onChange: e=>setEditF({...editF,qty_description:e.target.value})}))
                       , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}
-                        , React.createElement('div', {}, React.createElement('div', { className: "lbl", style: {color:"#EF233C"}}, "Proteina (g)" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", value: editF.protein, onChange: e=>setEditF({...editF,protein:e.target.value,kcal:String(Math.round(parseFloat(e.target.value||0)*4+parseFloat(editF.carbs||0)*4+parseFloat(editF.fat||0)*9))})}))
+                        , React.createElement('div', {}, React.createElement('div', { className: "lbl", style: {color:"#EF233C"}}, "Proteína (g)" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", value: editF.protein, onChange: e=>setEditF({...editF,protein:e.target.value,kcal:String(Math.round(parseFloat(e.target.value||0)*4+parseFloat(editF.carbs||0)*4+parseFloat(editF.fat||0)*9))})}))
                         , React.createElement('div', {}, React.createElement('div', { className: "lbl", style: {color:"#F4A261"}}, "Carbos (g)" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", value: editF.carbs, onChange: e=>setEditF({...editF,carbs:e.target.value,kcal:String(Math.round(parseFloat(editF.protein||0)*4+parseFloat(e.target.value||0)*4+parseFloat(editF.fat||0)*9))})}))
                         , React.createElement('div', {}, React.createElement('div', { className: "lbl", style: {color:TC}}, "Grasa (g)" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", value: editF.fat, onChange: e=>setEditF({...editF,fat:e.target.value,kcal:String(Math.round(parseFloat(editF.protein||0)*4+parseFloat(editF.carbs||0)*4+parseFloat(e.target.value||0)*9))})}))
                         , React.createElement('div', {}, React.createElement('div', { className: "lbl", style: {color:O}}, "Kcal"), React.createElement('input', { className: "inp", type: "number", value: editF.kcal, onChange: e=>setEditF({...editF,kcal:e.target.value})}))
                       )
                       , React.createElement('div', { style: {display:"flex",gap:8}}
-                        , React.createElement('button', { className: "btn", style: {flex:1,fontSize:13,padding:10}, onClick: ()=>{const updated=[...aiPrv];updated[i]={...f,...editF,protein:parseFloat(editF.protein)||0,carbs:parseFloat(editF.carbs)||0,fat:parseFloat(editF.fat)||0,kcal:parseFloat(editF.kcal)||0};setAiPrv(updated);setEditIdx(null);}}, "Guardar")
+                        , React.createElement('button', { className: "btn", style: {flex:1,fontSize:13,padding:10}, onClick: ()=>{const u=[...aiPrv];u[i]={...f,...editF,protein:parseFloat(editF.protein)||0,carbs:parseFloat(editF.carbs)||0,fat:parseFloat(editF.fat)||0,kcal:parseFloat(editF.kcal)||0};setAiPrv(u);setEditIdx(null);}}, "Guardar")
                         , React.createElement('button', { className: "bg", style: {padding:"10px 14px"}, onClick: ()=>setEditIdx(null)}, "Cancelar")
                       )
                     )
                   ):(
                     React.createElement('div', {}
                       , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}
-                        , React.createElement('div', { style: {flex:1}}
-                          , React.createElement('div', { style: {fontWeight:700,fontSize:14,color:T.txt,marginBottom:2}}, f.name)
-                          , React.createElement('div', { style: {fontSize:11,color:T.txt3}}, f.qty_description, f.qty_g?" · "+f.qty_g+"g":"")
-                        )
+                        , React.createElement('div', { style: {flex:1}}, React.createElement('div', { style: {fontWeight:700,fontSize:14,color:T.txt,marginBottom:2}}, f.name), React.createElement('div', { style: {fontSize:11,color:T.txt3}}, f.qty_description, f.qty_g?" · "+f.qty_g+"g":""))
                         , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6}}
-                          , React.createElement('div', { style: {textAlign:"center",background:O+"18",borderRadius:10,padding:"4px 10px"}}
-                            , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,color:O,lineHeight:1.1}}, Math.round(f.kcal))
-                            , React.createElement('div', { style: {fontSize:9,color:O,fontWeight:700}}, "KCAL")
-                          )
-                          , React.createElement('button', { onClick: ()=>{setEditIdx(i);setEditF({name:f.name,qty_description:f.qty_description||"",protein:String(f.protein||0),carbs:String(f.carbs||0),fat:String(f.fat||0),kcal:String(Math.round(f.kcal||0))});}, style: {background:TC+"18",border:`1px solid ${TC}44`,color:TC,borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:14,fontWeight:700}}, "✏️")
-                          , React.createElement('button', { onClick: ()=>setAiPrv(aiPrv.filter((_,j)=>j!==i)), style: {background:T.card,border:`1px solid ${T.brd}`,color:T.txt3,borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:13}}, "x")
+                          , React.createElement('div', { style: {textAlign:"center",background:O+"18",borderRadius:10,padding:"4px 10px"}}, React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,color:O,lineHeight:1.1}}, Math.round(f.kcal)), React.createElement('div', { style: {fontSize:9,color:O,fontWeight:700}}, "KCAL"))
+                          , React.createElement('button', { onClick: ()=>{setEditIdx(i);setEditF({name:f.name,qty_description:f.qty_description||"",protein:String(f.protein||0),carbs:String(f.carbs||0),fat:String(f.fat||0),kcal:String(Math.round(f.kcal||0))});}, style: {background:TC+"18",border:`1px solid ${TC}44`,color:TC,borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:14}}, "✏️")
+                          , React.createElement('button', { onClick: ()=>setAiPrv(aiPrv.filter((_,j)=>j!==i)), style: {background:T.card,border:`1px solid ${T.brd}`,color:T.txt3,borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:13}}, "✕")
                         )
                       )
                       , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}
-                        , [{l:"Proteina",v:f.protein,c:"#EF233C"},{l:"Carbos",v:f.carbs,c:"#F4A261"},{l:"Grasa",v:f.fat,c:TC}].map(m=>(
+                        , [{l:"Proteína",v:f.protein,c:"#EF233C"},{l:"Carbos",v:f.carbs,c:"#F4A261"},{l:"Grasa",v:f.fat,c:TC}].map(m=>(
                           React.createElement('div', { key: m.l, style: {background:T.card,borderRadius:10,padding:"8px 6px",textAlign:"center",border:`1px solid ${T.brd}`}}
                             , React.createElement('div', { style: {fontSize:9,color:m.c,fontWeight:700,marginBottom:3}}, m.l)
                             , React.createElement('div', { style: {fontSize:16,fontWeight:800,color:T.txt}}, Math.round(m.v), React.createElement('span', { style: {fontSize:10,color:T.txt3}}, "g"))
@@ -767,29 +636,20 @@ textarea.inp{resize:vertical;line-height:1.6}
                   , React.createElement('span', { style: {color:TC}}, "G " , Math.round(aiPrv.reduce((a,f)=>a+(f.fat||0),0)), "g")
                 )
               )
-              , React.createElement('div', { style: {display:"flex",gap:8}}, React.createElement('button', { className: "btn", style: {flex:1}, onClick: confirmAI}, "Agregar al diario"  ), React.createElement('button', { className: "bg", onClick: ()=>{setAiPrv(null);setAiTxt("");setEditIdx(null);}}, "Cancelar"))
+              , React.createElement('div', { style: {display:"flex",gap:8}}, React.createElement('button', { className: "btn", style: {flex:1}, onClick: confirmAI}, "➕ Agregar a "   , curMeal), React.createElement('button', { className: "bg", onClick: ()=>{setAiPrv(null);setAiTxt("");setEditIdx(null);}}, "Cancelar"))
             )
           )
+
           , mode==="search"&&React.createElement('div', {}
-            , React.createElement('div', { style: {display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}
-              , React.createElement('button', { className: `pl ${!brow&&!showFavs?"on":""}`, onClick: ()=>{setBrow(false);setShowFavs(false);setSel(null);}}, "🔍 Buscar" )
-              , React.createElement('button', { className: `pl ${brow?"on":""}`, onClick: ()=>{setBrow(true);setShowFavs(false);setSel(null);}}, "📂 Categorias" )
-              , React.createElement('button', { className: `pl ${showFavs?"on":""}`, onClick: ()=>{setShowFavs(true);setBrow(false);setSel(null);}}, "⭐ Favoritos "  , (data.favFoods||[]).length>0&&`(${(data.favFoods||[]).length})`)
-            )
-            , showFavs&&React.createElement('div', {}
-              , (data.favFoods||[]).length===0?React.createElement('div', { style: {textAlign:"center",color:T.txt3,fontSize:13,padding:20}}, "No tienes favoritos aún. Busca un alimento y toca ⭐"         ):
-              React.createElement('div', { style: {background:T.card2,borderRadius:12,maxHeight:280,overflowY:"auto",border:`1px solid ${T.brd}`}}
-                , (data.favFoods||[]).map((f,i)=>React.createElement('div', { key: i, className: "fs", style: {display:"flex",justifyContent:"space-between",alignItems:"center"}, onClick: ()=>{setSel(f);setShowFavs(false);}}
-                  , React.createElement('div', {}, React.createElement('div', { style: {fontWeight:600}}, f.n), React.createElement('div', { style: {fontSize:11,color:T.txt3}}, "P:", f.p, "g C:" , f.c, "g G:" , f.f, "g · "  , f.k, "kcal"))
-                  , React.createElement('button', { onClick: e=>{e.stopPropagation();const favs=(data.favFoods||[]).filter((_,j)=>j!==i);save({...data,favFoods:favs});}, style: {background:"none",border:"none",cursor:"pointer",fontSize:16,color:"#EF233C",padding:"0 4px"}}, "✕")
-                ))
-              )
+            , React.createElement('div', { style: {display:"flex",gap:6,marginBottom:10}}
+              , React.createElement('button', { className: `pl ${!brow?"on":""}`, onClick: ()=>{setBrow(false);setSel(null);}}, "🔍 Buscar" )
+              , React.createElement('button', { className: `pl ${brow?"on":""}`, onClick: ()=>{setBrow(true);setSel(null);}}, "📂 Categorías" )
             )
             , !brow&&React.createElement(React.Fragment, null, React.createElement('input', { className: "inp", type: "text", placeholder: "Busca alimentos..." , value: srch, onChange: e=>{setSrch(e.target.value);setSel(null);}, autoComplete: "off"})
               , filt.length>0&&!sel&&React.createElement('div', { style: {background:T.card2,borderRadius:12,marginTop:6,maxHeight:240,overflowY:"auto",border:`1px solid ${T.brd}`}}
-                , filt.map(f=>React.createElement('div', { key: f.n, className: "fs", style: {display:"flex",justifyContent:"space-between",alignItems:"center"}, onClick: ()=>{setSel(f);setSrch(f.n);}}
-                  , React.createElement('div', { style: {flex:1}}, React.createElement('div', { style: {display:"flex",justifyContent:"space-between"}}, React.createElement('span', { style: {fontWeight:600}}, f.n), React.createElement('span', { style: {color:O,fontWeight:700}}, f.k, " kcal" )), React.createElement('div', { style: {fontSize:11,color:T.txt3,marginTop:2}}, "P:", f.p, "g C:" , f.c, "g G:" , f.f, "g"))
-                  , React.createElement('button', { onClick: e=>{e.stopPropagation();const already=(data.favFoods||[]).find(x=>x.n===f.n);if(!already){const favs=[...(data.favFoods||[]),f];save({...data,favFoods:favs});msg("⭐ Guardado en favoritos");}}, style: {background:"none",border:"none",cursor:"pointer",fontSize:18,padding:"0 4px",color:(data.favFoods||[]).find(x=>x.n===f.n)?"#F4A261":"#444"}}, "⭐")
+                , filt.map(f=>React.createElement('div', { key: f.n, className: "fs", onClick: ()=>{setSel(f);setSrch(f.n);}}
+                  , React.createElement('div', { style: {display:"flex",justifyContent:"space-between"}}, React.createElement('span', { style: {fontWeight:600}}, f.n), React.createElement('span', { style: {color:O,fontWeight:700}}, f.k, " kcal" ))
+                  , React.createElement('div', { style: {fontSize:11,color:T.txt3,marginTop:2}}, "P:", f.p, "g C:" , f.c, "g G:" , f.f, "g")
                 ))
               )
             )
@@ -807,57 +667,46 @@ textarea.inp{resize:vertical;line-height:1.6}
               , React.createElement('div', { className: "g2"}, React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Cantidad (g)" ), React.createElement('input', { className: "inp", type: "number", value: qty, onChange: e=>setQty(e.target.value)})), React.createElement('div', { style: {display:"flex",alignItems:"flex-end"}}, React.createElement('button', { className: "btn", onClick: addFood}, "Agregar")))
             )
           )
+
           , mode==="manual"&&React.createElement('div', { style: {display:"flex",flexDirection:"column",gap:10}}
             , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Nombre"), React.createElement('input', { className: "inp", value: cu.n, onChange: e=>setCu({...cu,n:e.target.value})}))
             , React.createElement('div', { className: "g2"}
               , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Cantidad (g)" ), React.createElement('input', { className: "inp", type: "number", value: cu.q, onChange: e=>setCu({...cu,q:e.target.value})}))
               , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Kcal"), React.createElement('input', { className: "inp", type: "number", value: cu.k, onChange: e=>setCu({...cu,k:e.target.value})}))
-              , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Proteina g/100g" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", value: cu.p, onChange: e=>setCu({...cu,p:e.target.value})}))
+              , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Proteína g/100g" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", value: cu.p, onChange: e=>setCu({...cu,p:e.target.value})}))
               , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Carbos g/100g" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", value: cu.c, onChange: e=>setCu({...cu,c:e.target.value})}))
               , React.createElement('div', { style: {gridColumn:"1/-1"}}, React.createElement('div', { className: "lbl"}, "Grasa g/100g" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", value: cu.f, onChange: e=>setCu({...cu,f:e.target.value})}))
             )
             , React.createElement('button', { className: "btn", onClick: addCu}, "Agregar")
           )
+
+          , mode==="favs"&&React.createElement('div', {}
+            , (data.favFoods||[]).length===0?React.createElement('div', { style: {textAlign:"center",color:T.txt3,padding:20,fontSize:13}}, "Los alimentos que agregues con IA se guardan aquí automáticamente"         ):
+            React.createElement('div', { style: {maxHeight:300,overflowY:"auto"}}
+              , (data.favFoods||[]).map((f,i)=>React.createElement('div', { key: i, className: "fs", style: {display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:`1px solid ${T.brd}`}}
+                , React.createElement('div', {}, React.createElement('div', { style: {fontWeight:600,fontSize:13}}, f.n), React.createElement('div', { style: {fontSize:11,color:T.txt3}}, "P:", f.p, "g C:" , f.c, "g G:" , f.f, "g · "  , f.k, " kcal" ))
+                , React.createElement('button', { className: "bg", style: {padding:"6px 12px",fontSize:12}, onClick: ()=>{const logs={...(data.foodLogs||{})};logs[fDate]=[...(logs[fDate]||[]),{id:Date.now(),name:f.n,k:f.k,p:f.p,c:f.c,f:f.f,meal:curMeal}];save({...data,foodLogs:logs});msg("✅ Agregado");}}, "+")
+              ))
+            )
+          )
         )
-        , mac&&log.length>0&&React.createElement('div', {}
-          , (()=>{
-            const carbPct=mac.carb>0?tot.c/mac.carb:0;
-            const fatPct=mac.fat>0?tot.f/mac.fat:0;
-            const protPct=mac.prot>0?tot.p/mac.prot:0;
-            const carbLeft=Math.round(mac.carb-tot.c);
-            const fatLeft=Math.round(mac.fat-tot.f);
-            const protLeft=Math.round(mac.prot-tot.p);
-            return(React.createElement('div', { style: {marginBottom:12,display:"flex",flexDirection:"column",gap:8}}
-              , carbPct>=0.85&&carbPct<1&&React.createElement('div', { style: {background:"#F4A26118",border:"1px solid #F4A26144",borderRadius:12,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}
-                , React.createElement('div', {}, React.createElement('div', { style: {fontSize:12,fontWeight:700,color:"#F4A261"}}, "⚠️ Carbos casi al límite"    ), React.createElement('div', { style: {fontSize:11,color:T.txt3,marginTop:2}}, "Solo te quedan "   , carbLeft, "g — prefiere proteína o grasa"     ))
+
+        /* Lista por comidas */
+        , log.length>0&&React.createElement('div', {}
+          , React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:4}}, log.length, " alimentos · "   , Math.round(tot.k), " kcal" )
+          , MEALS.map(meal=>{
+            const mItems=log.filter(f=>f.meal===meal||(meal==="Desayuno"&&!f.meal));
+            if(mItems.length===0)return null;
+            const mTot=mItems.reduce((a,f)=>a+f.k,0);
+            return(React.createElement('div', { key: meal}
+              , React.createElement('div', { className: "meal-header"}
+                , React.createElement('span', { style: {fontSize:13,fontWeight:700,color:O}}, meal==="Desayuno"?"🌅":meal==="Almuerzo"?"☀️":meal==="Cena"?"🌙":"🍎", " " , meal)
+                , React.createElement('span', { style: {fontSize:12,color:T.txt3,fontWeight:600}}, Math.round(mTot), " kcal" )
               )
-              , carbPct>=1&&React.createElement('div', { style: {background:"#EF233C18",border:"1px solid #EF233C44",borderRadius:12,padding:"10px 14px"}}
-                , React.createElement('div', { style: {fontSize:12,fontWeight:700,color:"#EF233C"}}, "🚫 Carbos superados en "    , Math.round(tot.c-mac.carb), "g")
-                , React.createElement('div', { style: {fontSize:11,color:T.txt3,marginTop:2}}, "El resto del día solo proteína, verduras y grasa"        )
-              )
-              , fatPct>=0.85&&fatPct<1&&React.createElement('div', { style: {background:"#0096C718",border:"1px solid #0096C744",borderRadius:12,padding:"10px 14px"}}
-                , React.createElement('div', { style: {fontSize:12,fontWeight:700,color:"#0096C7"}}, "⚠️ Grasa casi al límite — quedan "       , fatLeft, "g")
-                , React.createElement('div', { style: {fontSize:11,color:T.txt3,marginTop:2}}, "Evita aceites, fritos y snacks grasos"     )
-              )
-              , protPct<0.6&&log.length>=2&&React.createElement('div', { style: {background:"#2DC65318",border:"1px solid #2DC65344",borderRadius:12,padding:"10px 14px"}}
-                , React.createElement('div', { style: {fontSize:12,fontWeight:700,color:"#2DC653"}}, "💪 Completa tu proteína — faltan "      , protLeft, "g")
-                , React.createElement('div', { style: {fontSize:11,color:T.txt3,marginTop:2}}, "Agrega pollo, huevos, atún o whey para llegar a tu meta"          )
-              )
-            ));
-          })()
-          , MEALS.map(m=>{
-            const mItems=log.filter(f=>(f.meal||"breakfast")===m.v);
-            if(!mItems.length)return null;
-            const mTot=mItems.reduce((a,f)=>({k:a.k+(f.k||0),p:a.p+(f.p||0),c:a.c+(f.c||0),f:a.f+(f.f||0)}),{k:0,p:0,c:0,f:0});
-            return(React.createElement('div', { key: m.v, style: {marginBottom:14}}
-              , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8,paddingBottom:6,borderBottom:`2px solid ${T.brd}`}}
-                , React.createElement('div', { style: {fontSize:13,fontWeight:800,color:T.txt}}, m.l)
-                , React.createElement('div', { style: {fontSize:11,color:T.txt3,fontWeight:600}}, Math.round(mTot.k), " kcal · P"   , Math.round(mTot.p), "g C" , Math.round(mTot.c), "g G" , Math.round(mTot.f), "g")
-              )
-              , mItems.map(f=>React.createElement('div', { key: f.id, className: "fr", style: {marginBottom:6}}
+              , mItems.map(f=>React.createElement('div', { key: f.id, className: "fr"}
                 , React.createElement('div', { style: {flex:1}}, React.createElement('div', { style: {fontWeight:600,fontSize:13}}, f.name), React.createElement('div', { style: {fontSize:11,color:T.txt3,marginTop:2}}, "P", React.createElement('span', { style: {color:"#EF233C"}}, f.p, "g"), " C" , React.createElement('span', { style: {color:"#F4A261"}}, f.c, "g"), " G" , React.createElement('span', { style: {color:TC}}, f.f, "g")))
                 , React.createElement('div', { style: {textAlign:"right",marginRight:8}}, React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:20,color:O,letterSpacing:1}}, Math.round(f.k)), React.createElement('div', { style: {fontSize:9,color:T.txt3}}, "KCAL"))
-                , React.createElement('button', { onClick: ()=>delF(f.id), style: {background:T.card2,border:`1px solid ${T.brd}`,color:T.txt3,borderRadius:8,width:26,height:26,cursor:"pointer",fontSize:13}}, "x")
+                , React.createElement('button', { onClick: ()=>delF(f.id), style: {background:T.card2,border:`1px solid ${T.brd}`,color:T.txt3,borderRadius:8,width:26,height:26,cursor:"pointer",fontSize:13}}, "✕")
               ))
             ));
           })
@@ -869,9 +718,9 @@ textarea.inp{resize:vertical;line-height:1.6}
           , React.createElement('div', {}, React.createElement('div', { className: "ttl"}, "ENTRENA"), React.createElement('div', { className: "sub"}, "Registro de sesiones"  ))
           , React.createElement('input', { className: "inp", type: "date", value: wDate, onChange: e=>setWDate(e.target.value), style: {width:"auto",fontSize:12,padding:"8px 12px"}})
         )
-        , React.createElement('div', { className: "card"}
-          , React.createElement('div', { className: "lbl", style: {marginBottom:10}}, "Tipo de dia — "    , wDate===today?"hoy":fmt(wDate))
-          , React.createElement('div', { style: {display:"flex",gap:8,marginBottom:10}}
+        , React.createElement('div', { className: "card", style: {marginBottom:12}}
+          , React.createElement('div', { className: "lbl", style: {marginBottom:10}}, "Tipo de día — "    , wDate===today?"hoy":fmt(wDate))
+          , React.createElement('div', { style: {display:"flex",gap:8}}
             , Object.entries(DT).map(([k,v])=>(
               React.createElement('button', { key: k, className: "dc", onClick: ()=>setDT(wDate,k), style: {borderColor:getDT(wDate)===k?v.c:T.brd,background:getDT(wDate)===k?v.c+"22":T.card,flex:1}}
                 , React.createElement('div', { style: {fontSize:24,marginBottom:4}}, v.l.split(" ")[0])
@@ -879,13 +728,12 @@ textarea.inp{resize:vertical;line-height:1.6}
               )
             ))
           )
-          , getDT(wDate)!=="normal"&&React.createElement('div', { style: {fontSize:12,color:DT[getDT(wDate)].c,background:DT[getDT(wDate)].c+"11",borderRadius:10,padding:"8px 12px",fontWeight:500,marginBottom:10}}, DT[getDT(wDate)].tip)
-          , mac&&React.createElement('div', { style: {background:T.card2,borderRadius:12,padding:12,border:`1px solid ${T.brd}`}}
-            , React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "Macros para hoy ("   , DT[getDT(wDate)].l.slice(3), ")")
-            , React.createElement('div', { style: {display:"flex",gap:12,flexWrap:"wrap"}}
-              , [{l:"Calorias",v:mac.kcal,u:"kcal",c:O},{l:"Proteina",v:mac.prot,u:"g",c:"#EF233C"},{l:"Carbos",v:mac.carb,u:"g",c:"#F4A261"},{l:"Grasa",v:mac.fat,u:"g",c:TC}].map(m=>(
+          , mac&&React.createElement('div', { style: {background:T.card2,borderRadius:12,padding:12,marginTop:10,border:`1px solid ${T.brd}`}}
+            , React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "Macros para "  , getDT(wDate)==="training"?"día de entreno":"día de descanso")
+            , React.createElement('div', { style: {display:"flex",gap:16,flexWrap:"wrap"}}
+              , [{l:"Calorías",v:mac.kcal,u:"kcal",c:O},{l:"Proteína",v:mac.prot,u:"g",c:"#EF233C"},{l:"Carbos",v:mac.carb,u:"g",c:"#F4A261"},{l:"Grasa",v:mac.fat,u:"g",c:TC}].map(m=>(
                 React.createElement('div', { key: m.l, style: {textAlign:"center"}}
-                  , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:24,color:m.c,letterSpacing:1,lineHeight:1}}, m.v)
+                  , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,color:m.c,letterSpacing:1,lineHeight:1}}, m.v)
                   , React.createElement('div', { style: {fontSize:9,color:T.txt3,fontWeight:700,textTransform:"uppercase"}}, m.l)
                 )
               ))
@@ -908,19 +756,19 @@ textarea.inp{resize:vertical;line-height:1.6}
           , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:14}}, "+ Nuevo entrenamiento"  )
           , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Tipo"), React.createElement('div', { style: {display:"flex",gap:6,flexWrap:"wrap"}}, WT.map(t=>React.createElement('button', { key: t, className: `pl ${wF.type===t?"on":""}`, onClick: ()=>setWF({...wF,type:t})}, t))))
           , React.createElement('div', { style: {background:T.card2,borderRadius:16,padding:16,marginBottom:12,border:`1px solid ${T.brd}`}}
-            , React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:12}}, "Metricas de la sesion"   )
+            , React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:12}}, "Métricas de la sesión"   )
             , React.createElement('div', { className: "g2", style: {marginBottom:10}}
-              , React.createElement('div', {}, React.createElement('div', { style: {fontSize:11,color:T.txt2,marginBottom:6}}, "Kcal totales" ), React.createElement('input', { className: "inp", type: "number", placeholder: "850", value: wF.kcal, onChange: e=>setWF({...wF,kcal:e.target.value})}))
-              , React.createElement('div', {}, React.createElement('div', { style: {fontSize:11,color:T.txt2,marginBottom:6}}, "Duracion (min)" ), React.createElement('input', { className: "inp", type: "number", placeholder: "60", value: wF.duration, onChange: e=>setWF({...wF,duration:e.target.value})}))
+              , React.createElement('div', {}, React.createElement('div', { style: {fontSize:11,color:T.txt2,marginBottom:6}}, "🔥 Kcal totales"  ), React.createElement('input', { className: "inp", type: "number", placeholder: "850", value: wF.kcal, onChange: e=>setWF({...wF,kcal:e.target.value})}))
+              , React.createElement('div', {}, React.createElement('div', { style: {fontSize:11,color:T.txt2,marginBottom:6}}, "⏱️ Duración (min)"  ), React.createElement('input', { className: "inp", type: "number", placeholder: "60", value: wF.duration, onChange: e=>setWF({...wF,duration:e.target.value})}))
             )
             , React.createElement('div', { className: "g2", style: {marginBottom:10}}
-              , React.createElement('div', {}, React.createElement('div', { style: {fontSize:11,color:T.txt2,marginBottom:6}}, "FC promedio (bpm)"  ), React.createElement('input', { className: "inp", type: "number", placeholder: "135", value: wF.heartRate, onChange: e=>setWF({...wF,heartRate:e.target.value})}))
-              , React.createElement('div', {}, React.createElement('div', { style: {fontSize:11,color:T.txt2,marginBottom:6}}, "Kcal activas" ), React.createElement('input', { className: "inp", type: "number", placeholder: "700", value: wF.activeKcal, onChange: e=>setWF({...wF,activeKcal:e.target.value})}))
+              , React.createElement('div', {}, React.createElement('div', { style: {fontSize:11,color:T.txt2,marginBottom:6}}, "❤️ FC promedio (bpm)"   ), React.createElement('input', { className: "inp", type: "number", placeholder: "135", value: wF.heartRate, onChange: e=>setWF({...wF,heartRate:e.target.value})}))
+              , React.createElement('div', {}, React.createElement('div', { style: {fontSize:11,color:T.txt2,marginBottom:6}}, "🫀 Kcal activas"  ), React.createElement('input', { className: "inp", type: "number", placeholder: "700", value: wF.activeKcal, onChange: e=>setWF({...wF,activeKcal:e.target.value})}))
             )
             , React.createElement('div', { className: "g3"}
-              , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Resist. aerobica" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", placeholder: "3.9", value: wF.aerobic, onChange: e=>setWF({...wF,aerobic:e.target.value})}))
-              , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Resist. anaerobica" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", placeholder: "2.8", value: wF.anaerobic, onChange: e=>setWF({...wF,anaerobic:e.target.value})}))
-              , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Recuperacion (h)" ), React.createElement('input', { className: "inp", type: "number", placeholder: "48", value: wF.recovery, onChange: e=>setWF({...wF,recovery:e.target.value})}))
+              , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Resist. aeróbica" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", placeholder: "3.9", value: wF.aerobic, onChange: e=>setWF({...wF,aerobic:e.target.value})}))
+              , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Resist. anaeróbica" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", placeholder: "2.8", value: wF.anaerobic, onChange: e=>setWF({...wF,anaerobic:e.target.value})}))
+              , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Recuperación (h)" ), React.createElement('input', { className: "inp", type: "number", placeholder: "48", value: wF.recovery, onChange: e=>setWF({...wF,recovery:e.target.value})}))
             )
           )
           , React.createElement('div', { style: {marginBottom:12}}
@@ -936,34 +784,34 @@ textarea.inp{resize:vertical;line-height:1.6}
                 , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Peso (kg)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: exI.weight, onChange: e=>setExI({...exI,weight:e.target.value})}))
                 , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Distancia (km)" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", value: exI.distance, onChange: e=>setExI({...exI,distance:e.target.value})}))
               )
-              , React.createElement('button', { className: "btn", onClick: addEx, disabled: !exI.name}, "Agregar ejercicio" )
+              , React.createElement('button', { className: "btn", onClick: ()=>{if(!exI.name)return;setWF(w=>({...w,exercises:[...w.exercises,{...exI,id:Date.now()}]}));setExI({name:"",sets:"",reps:"",weight:"",distance:""});setShowEx(false);}}, "Agregar ejercicio" )
             )
             , wF.exercises.map((ex,i)=>React.createElement('div', { key: ex.id, className: "exr"}, React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}
-              , React.createElement('div', {}, React.createElement('div', { style: {fontWeight:700,fontSize:13,color:T.txt,marginBottom:4}}, ex.name), React.createElement('div', { style: {display:"flex",gap:6,flexWrap:"wrap"}}
-                , ex.sets&&ex.reps&&React.createElement('span', { className: "bdg", style: {background:O+"18",color:O}}, ex.sets, "x", ex.reps)
+              , React.createElement('div', {}, React.createElement('div', { style: {fontWeight:700,fontSize:13,marginBottom:4}}, ex.name), React.createElement('div', { style: {display:"flex",gap:6,flexWrap:"wrap"}}
+                , ex.sets&&ex.reps&&React.createElement('span', { className: "bdg", style: {background:O+"18",color:O}}, ex.sets, "×", ex.reps)
                 , ex.weight&&React.createElement('span', { className: "bdg", style: {background:TC+"18",color:TC}}, ex.weight, "kg")
                 , ex.distance&&React.createElement('span', { className: "bdg", style: {background:"#457B9D18",color:"#457B9D"}}, ex.distance, "km")
               ))
-              , React.createElement('button', { onClick: ()=>setWF(w=>({...w,exercises:w.exercises.filter((_,j)=>j!==i)})), style: {background:"transparent",border:"none",color:T.txt3,cursor:"pointer",fontSize:16,padding:"0 4px"}}, "x")
+              , React.createElement('button', { onClick: ()=>setWF(w=>({...w,exercises:w.exercises.filter((_,j)=>j!==i)})), style: {background:"transparent",border:"none",color:T.txt3,cursor:"pointer",fontSize:16}}, "✕")
             )))
           )
           , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Notas"), React.createElement('textarea', { className: "inp", rows: 2, value: wF.notes, onChange: e=>setWF({...wF,notes:e.target.value})}))
-          , React.createElement('button', { className: "btn", onClick: saveWO, disabled: !wF.duration&&!wF.exercises.length&&!wF.kcal}, "Guardar entrenamiento" )
+          , React.createElement('button', { className: "btn", onClick: saveWO, disabled: !wF.duration&&!wF.exercises.length&&!wF.kcal}, "💪 Guardar entrenamiento"  )
         )
         , ((data.workoutLogs||{})[wDate]||[]).map(w=>React.createElement('div', { key: w.id, className: "card", style: {borderLeft:`3px solid ${O}`}}
           , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}
             , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,color:O,letterSpacing:1}}, w.type)
             , React.createElement('button', { className: "bg", style: {padding:"4px 10px",fontSize:11}, onClick: ()=>{const l={...(data.workoutLogs||{})};l[wDate]=(l[wDate]||[]).filter(x=>x.id!==w.id);save({...data,workoutLogs:l});}}, "Eliminar")
           )
-          , (w.kcal||w.duration||w.heartRate)&&React.createElement('div', { style: {background:T.card2,borderRadius:14,padding:14,marginBottom:12,border:`1px solid ${T.brd}`}}
-            , w.kcal&&React.createElement('div', { style: {marginBottom:8}}, React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:48,color:T.txt,letterSpacing:1,lineHeight:1}}, w.kcal, React.createElement('span', { style: {fontSize:16,color:T.txt3}}, " kcal" )))
+          , (w.kcal||w.duration)&&React.createElement('div', { style: {background:T.card2,borderRadius:14,padding:14,marginBottom:12,border:`1px solid ${T.brd}`}}
+            , w.kcal&&React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:48,color:T.txt,letterSpacing:1,lineHeight:1,marginBottom:8}}, w.kcal, React.createElement('span', { style: {fontSize:16,color:T.txt3}}, " kcal" ))
             , React.createElement('div', { style: {display:"flex",gap:16,flexWrap:"wrap"}}
-              , w.duration&&React.createElement('div', {}, React.createElement('div', { style: {fontSize:10,color:TC,fontWeight:700,textTransform:"uppercase"}}, "Duracion"), React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,color:T.txt,letterSpacing:1}}, w.duration, React.createElement('span', { style: {fontSize:13,color:T.txt3}}, " min" )))
+              , w.duration&&React.createElement('div', {}, React.createElement('div', { style: {fontSize:10,color:TC,fontWeight:700,textTransform:"uppercase"}}, "Duración"), React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,color:T.txt,letterSpacing:1}}, w.duration, React.createElement('span', { style: {fontSize:13,color:T.txt3}}, " min" )))
               , w.heartRate&&React.createElement('div', {}, React.createElement('div', { style: {fontSize:10,color:"#EF233C",fontWeight:700,textTransform:"uppercase"}}, "FC prom" ), React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,color:T.txt,letterSpacing:1}}, w.heartRate, React.createElement('span', { style: {fontSize:13,color:T.txt3}}, " bpm" )))
               , w.activeKcal&&React.createElement('div', {}, React.createElement('div', { style: {fontSize:10,color:O,fontWeight:700,textTransform:"uppercase"}}, "Activas"), React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,color:T.txt,letterSpacing:1}}, w.activeKcal, React.createElement('span', { style: {fontSize:13,color:T.txt3}}, " kcal" )))
             )
           )
-          , w.exercises?.length>0&&React.createElement('div', {}, w.exercises.map((ex,i)=>React.createElement('div', { key: i, style: {display:"flex",justifyContent:"space-between",padding:"8px 0",borderTop:`1px solid ${T.brd}`}}, React.createElement('span', { style: {fontSize:13,fontWeight:600}}, ex.name), React.createElement('div', { style: {display:"flex",gap:6}}, ex.sets&&ex.reps&&React.createElement('span', { className: "bdg", style: {background:O+"18",color:O}}, ex.sets, "x", ex.reps), ex.weight&&React.createElement('span', { className: "bdg", style: {background:TC+"18",color:TC}}, ex.weight, "kg")))))
+          , w.exercises?.length>0&&React.createElement('div', {}, w.exercises.map((ex,i)=>React.createElement('div', { key: i, style: {display:"flex",justifyContent:"space-between",padding:"8px 0",borderTop:`1px solid ${T.brd}`}}, React.createElement('span', { style: {fontSize:13,fontWeight:600}}, ex.name), React.createElement('div', { style: {display:"flex",gap:6}}, ex.sets&&ex.reps&&React.createElement('span', { className: "bdg", style: {background:O+"18",color:O}}, ex.sets, "×", ex.reps), ex.weight&&React.createElement('span', { className: "bdg", style: {background:TC+"18",color:TC}}, ex.weight, "kg")))))
           , w.notes&&React.createElement('div', { style: {fontSize:12,color:T.txt3,marginTop:10,paddingTop:10,borderTop:`1px solid ${T.brd}`}}, w.notes)
         ))
       )
@@ -972,31 +820,53 @@ textarea.inp{resize:vertical;line-height:1.6}
         , React.createElement('div', { className: "ttl"}, "MEDIDAS")
         , React.createElement('div', { className: "sub"}, "Registro semanal" )
         , latest&&React.createElement('div', { style: {display:"flex",gap:8,overflowX:"auto",marginBottom:12}}
-          , [{l:"Peso",v:latest.weight,u:"kg",c:O},{l:"% Grasa",v:latest.bodyfat,u:"%",c:"#EF233C"},{l:"Cintura",v:latest.waist,u:"cm",c:TC},{l:"Biceps",v:latest.arms,u:"cm",c:"#457B9D"}].map(s=>(
+          , [{l:"Peso",v:latest.weight,u:"kg",c:O},{l:"% Grasa",v:latest.bodyfat,u:"%",c:"#EF233C"},{l:"Cintura",v:latest.waist,u:"cm",c:TC},{l:"Bíceps",v:latest.arms,u:"cm",c:"#457B9D"}].map(s=>(
             React.createElement('div', { key: s.l, style: {background:T.card,border:`1px solid ${T.brd}`,borderRadius:14,padding:"12px 14px",minWidth:80,flexShrink:0,borderTop:`2px solid ${s.c}`}}
               , React.createElement('div', { style: {fontSize:9,color:T.txt3,fontWeight:700,textTransform:"uppercase"}}, s.l)
               , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,color:s.c,marginTop:2,letterSpacing:1}}, s.v||"—", s.v?s.u:"")
             )
           ))
         )
+        /* BF indicator with range */
+        , latest?.bodyfat&&(()=>{
+          const bf=parseFloat(latest.bodyfat);
+          const cat=getBFCategory(bf,pr.sex);
+          const ideal=pr.sex==="female"?{min:18,max:28}:{min:10,max:20};
+          return(React.createElement('div', { className: "card", style: {borderLeft:`3px solid ${cat.c}`,marginBottom:12}}
+            , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center"}}
+              , React.createElement('div', {}
+                , React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:4}}, "% Grasa corporal"  )
+                , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:42,color:cat.c,letterSpacing:1,lineHeight:1}}, bf, React.createElement('span', { style: {fontSize:16}}, "%"))
+                , React.createElement('span', { style: {background:cat.c+"22",color:cat.c,borderRadius:20,padding:"3px 12px",fontSize:12,fontWeight:700,marginTop:6,display:"inline-block"}}, cat.ok?"✅":"⚠️", " " , cat.l)
+              )
+              , React.createElement('div', { style: {textAlign:"right",fontSize:12,color:T.txt3}}
+                , React.createElement('div', { style: {marginBottom:4}}, "Rango ideal:" )
+                , React.createElement('div', { style: {fontWeight:700,color:T.txt2}}, ideal.min, "-", ideal.max, "%")
+                , React.createElement('div', { style: {marginTop:8,fontSize:11,color:bf<ideal.min?"#457B9D":bf>ideal.max?"#EF233C":"#2DC653",fontWeight:700}}
+                  , bf<ideal.min?"Por debajo del rango":bf>ideal.max?"Por encima del rango":"Dentro del rango ideal"
+                )
+              )
+            )
+          ));
+        })()
         , cData.length>1&&React.createElement('div', { className: "card"}
           , React.createElement('div', { style: {display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}
             , CH.map(c=>React.createElement('button', { key: c.key, className: `pl ${cht===c.key?"on":""}`, onClick: ()=>setCht(c.key), style: cht===c.key?{borderColor:c.c,background:c.c+"18",color:c.c}:{}}, c.l))
           )
           , (()=>{
-            const pts=cData.filter(d=>d[cc.dk]!==null&&d[cc.dk]!==undefined);
-            if(pts.length<2) return React.createElement('div', { style: {textAlign:"center",color:T.txt3,fontSize:13,padding:20}}, "Necesitas al menos 2 registros"    );
+            const pts=cData.filter(d=>d[cc.dk]!==null&&d[cc.dk]!==undefined&&!isNaN(d[cc.dk]));
+            if(pts.length<2)return React.createElement('div', { style: {textAlign:"center",color:T.txt3,fontSize:13,padding:20}}, "Necesitas al menos 2 registros para ver la gráfica"        );
             const vals=pts.map(d=>d[cc.dk]);
             const mn=Math.min(...vals),mx=Math.max(...vals),rng=mx-mn||1;
             const W=320,H=150,PX=30,PY=8,iW=W-PX*2,iH=H-PY*2-18;
             const path=pts.map((d,i)=>{const x=PX+(i/(pts.length-1))*iW,y=PY+iH-((d[cc.dk]-mn)/rng)*iH;return(i===0?"M":"L")+x.toFixed(1)+","+y.toFixed(1);}).join(" ");
-            const lastPt={x:PX+((pts.length-1)/(pts.length-1))*iW,y:PY+iH-((pts[pts.length-1][cc.dk]-mn)/rng)*iH};
-            return React.createElement('svg', { width: "100%", viewBox: "0 0 "+W+" "+H, style: {display:"block"}}
-              , React.createElement('path', { d: path+" L"+(PX+(pts.length-1)/(pts.length-1)*iW)+","+(PY+iH)+" L"+PX+","+(PY+iH)+" Z", fill: cc.c+"22"})
+            const lastX=PX+((pts.length-1)/(pts.length-1))*iW,lastY=PY+iH-((pts[pts.length-1][cc.dk]-mn)/rng)*iH;
+            return React.createElement('svg', { width: "100%", viewBox: `0 0 ${W} ${H}`, style: {display:"block"}}
+              , React.createElement('path', { d: path+` L${lastX},${PY+iH} L${PX},${PY+iH} Z`, fill: cc.c+"22"})
               , React.createElement('path', { d: path, fill: "none", stroke: cc.c, strokeWidth: "2.5", strokeLinecap: "round"})
               , pts.map((d,i)=>React.createElement('circle', { key: i, cx: PX+(i/(pts.length-1))*iW, cy: PY+iH-((d[cc.dk]-mn)/rng)*iH, r: "4", fill: cc.c}))
-              , React.createElement('text', { x: lastPt.x, y: lastPt.y-8, fill: cc.c, fontSize: "11", textAnchor: "middle", fontWeight: "bold"}, pts[pts.length-1][cc.dk])
-              , [pts[0],pts[pts.length-1]].map((d,i)=>React.createElement('text', { key: i, x: PX+(i*(pts.length-1)/(pts.length-1))*iW, y: H-2, fill: T.txt3, fontSize: "9", textAnchor: "middle"}, d.f))
+              , React.createElement('text', { x: lastX, y: lastY-8, fill: cc.c, fontSize: "11", textAnchor: "middle", fontWeight: "bold"}, pts[pts.length-1][cc.dk])
+              , [0,pts.length-1].map(i=>React.createElement('text', { key: i, x: PX+(i/(pts.length-1))*iW, y: H-2, fill: T.txt3, fontSize: "9", textAnchor: "middle"}, pts[i].f))
               , React.createElement('line', { x1: PX, y1: PY+iH, x2: W-PX, y2: PY+iH, stroke: T.brd})
             );
           })()
@@ -1007,20 +877,29 @@ textarea.inp{resize:vertical;line-height:1.6}
             , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Fecha"), React.createElement('input', { className: "inp", type: "date", value: mF.date, onChange: e=>setMF({...mF,date:e.target.value})}))
             , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Peso (kg)" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", placeholder: "60", value: mF.weight, onChange: e=>setMF({...mF,weight:e.target.value})}))
             , React.createElement('div', { style: {borderTop:`1px solid ${T.brd}`,paddingTop:12}}
-              , React.createElement('div', { style: {fontSize:11,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:4}}, "Para calcular % grasa"   )
+              , React.createElement('div', { style: {fontSize:11,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:4}}, "Para calcular % grasa (Fórmula Marina)"     )
               , React.createElement('div', { className: "g2"}
                 , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Cintura (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: mF.waist, onChange: e=>setMF({...mF,waist:e.target.value})}))
                 , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Cuello (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: mF.neck, onChange: e=>setMF({...mF,neck:e.target.value})}))
                 , pr.sex==="female"&&React.createElement('div', { style: {gridColumn:"1/-1"}}, React.createElement('div', { className: "lbl"}, "Cadera (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: mF.hips, onChange: e=>setMF({...mF,hips:e.target.value})}))
               )
-              , React.createElement(BFWidget, { sex: pr.sex, height: pr.height, waist: mF.waist, hips: mF.hips, neck: mF.neck, bodyfat: mF.bodyfat, age: pr.age, onChange: val=>setMF(f=>({...f,bodyfat:val}))})
+              , (()=>{
+                const bf=calcBF(pr.sex,pr.height,mF.waist,mF.hips,mF.neck);
+                if(!bf) return null;
+                const cat=getBFCategory(bf,pr.sex);
+                if(String(bf)!==mF.bodyfat) setTimeout(()=>setMF(f=>({...f,bodyfat:String(bf)})),0);
+                return(React.createElement('div', { style: {marginTop:12,background:T.card2,borderRadius:14,padding:14,display:"flex",justifyContent:"space-between",alignItems:"center",border:`1px solid ${cat.c}44`}}
+                  , React.createElement('div', {}, React.createElement('div', { style: {fontSize:9,color:T.txt3,fontWeight:700,textTransform:"uppercase"}}, "% Grasa calculado"  ), React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:36,color:cat.c,letterSpacing:1,lineHeight:1.1}}, bf, React.createElement('span', { style: {fontSize:16}}, "%")), React.createElement('span', { style: {background:cat.c+"22",color:cat.c,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700}}, cat.ok?"✅":"⚠️", " " , cat.l))
+                  , React.createElement(Ring, { pct: bf, size: 72, stroke: 6, color: cat.c}, React.createElement('span', { style: {fontSize:11,fontWeight:800,color:cat.c}}, bf, "%"))
+                ));
+              })()
             )
             , React.createElement('div', { style: {borderTop:`1px solid ${T.brd}`,paddingTop:12}}, React.createElement('div', { className: "g2"}
               , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Pecho (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: mF.chest, onChange: e=>setMF({...mF,chest:e.target.value})}))
-              , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Biceps (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: mF.arms, onChange: e=>setMF({...mF,arms:e.target.value})}))
+              , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Bíceps (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: mF.arms, onChange: e=>setMF({...mF,arms:e.target.value})}))
             ))
-            , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Nota"), React.createElement('input', { className: "inp", placeholder: "ej. dia de pierna..."   , value: mF.note, onChange: e=>setMF({...mF,note:e.target.value})}))
-            , React.createElement('button', { className: "btn", onClick: addE}, "Guardar registro" )
+            , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Nota"), React.createElement('input', { className: "inp", placeholder: "ej. día de pierna..."   , value: mF.note, onChange: e=>setMF({...mF,note:e.target.value})}))
+            , React.createElement('button', { className: "btn", onClick: addE}, "💾 Guardar registro"  )
           )
         )
         , sorted.length>0&&React.createElement('div', {}
@@ -1031,10 +910,10 @@ textarea.inp{resize:vertical;line-height:1.6}
               , React.createElement('button', { className: "bg", style: {padding:"3px 10px",fontSize:11}, onClick: ()=>save({...data,entries:data.entries.filter(x=>x.id!==e.id)})}, "Eliminar")
             )
             , React.createElement('div', { style: {display:"flex",gap:8,flexWrap:"wrap"}}
-              , e.weight&&React.createElement('span', { className: "bdg", style: {background:T.card2,color:T.txt2}}, e.weight, "kg")
-              , e.bodyfat&&React.createElement('span', { className: "bdg", style: {background:"#EF233C18",color:"#EF233C"}}, e.bodyfat, "%")
+              , e.weight&&React.createElement('span', { className: "bdg", style: {background:T.card2,color:T.txt2}}, "⚖️ " , e.weight, "kg")
+              , e.bodyfat&&(()=>{const cat=getBFCategory(parseFloat(e.bodyfat),pr.sex);return React.createElement('span', { className: "bdg", style: {background:cat.c+"18",color:cat.c}}, "🔥 " , e.bodyfat, "% " , cat.l);})()
               , e.waist&&React.createElement('span', { className: "bdg", style: {background:T.card2,color:T.txt2}}, "Cin " , e.waist, "cm")
-              , e.arms&&React.createElement('span', { className: "bdg", style: {background:TC+"18",color:TC}}, e.arms, "cm")
+              , e.arms&&React.createElement('span', { className: "bdg", style: {background:TC+"18",color:TC}}, "💪 " , e.arms, "cm")
             )
             , e.note&&React.createElement('div', { style: {fontSize:11,color:T.txt3,marginTop:8}}, e.note)
           ))
@@ -1056,11 +935,11 @@ textarea.inp{resize:vertical;line-height:1.6}
             );})
           )
           , React.createElement('div', { className: "g2"}
-            , React.createElement('div', { style: {background:T.card2,borderRadius:12,padding:12,textAlign:"center",border:`1px solid ${T.brd}`}}, React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:32,color:O,letterSpacing:1}}, wk.filter(d=>getDT(d)==="training").length), React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase"}}, "Entrenos"))
-            , React.createElement('div', { style: {background:T.card2,borderRadius:12,padding:12,textAlign:"center",border:`1px solid ${T.brd}`}}, React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:32,color:TC,letterSpacing:1}}, wk.filter(d=>((data.foodLogs||{})[d]||[]).length>0).length), React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase"}}, "Con registro" ))
+            , React.createElement('div', { style: {background:T.card2,borderRadius:12,padding:12,textAlign:"center",border:`1px solid ${T.brd}`}}, React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:32,color:O,letterSpacing:1}}, wk.filter(d=>getDT(d)==="training").length), React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase"}}, "💪 Entrenos" ))
+            , React.createElement('div', { style: {background:T.card2,borderRadius:12,padding:12,textAlign:"center",border:`1px solid ${T.brd}`}}, React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:32,color:TC,letterSpacing:1}}, wk.filter(d=>((data.foodLogs||{})[d]||[]).length>0).length), React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase"}}, "🍽 Con registro"  ))
           )
         )
-        , React.createElement('button', { className: "btn", onClick: doRep, disabled: repLd, style: {marginBottom:12}}, repLd?"Analizando tu semana...":"Generar reporte con IA")
+        , React.createElement('button', { className: "btn", onClick: doRep, disabled: repLd, style: {marginBottom:12}}, repLd?"⏳ Analizando tu semana...":"📊 Generar reporte con IA")
         , repErr&&React.createElement('div', { style: {background:"#EF233C18",border:"1px solid #EF233C33",borderRadius:12,padding:12,fontSize:12,color:"#EF233C",marginBottom:12}}, repErr)
         , rep&&React.createElement('div', { style: {display:"flex",flexDirection:"column",gap:12}}
           , React.createElement('div', { className: "card", style: {borderLeft:`4px solid ${rep.calificacion==="A"?TC:rep.calificacion==="B"?"#2DC653":rep.calificacion==="C"?O:"#EF233C"}`}}
@@ -1070,20 +949,58 @@ textarea.inp{resize:vertical;line-height:1.6}
             )
           )
           , React.createElement('div', { className: "g2"}
-            , React.createElement('div', { style: {background:T.card,border:`1px solid ${TC}33`,borderRadius:16,padding:14}}, React.createElement('div', { style: {fontSize:10,color:TC,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "Logros"), rep.puntos_fuertes?.map((f,i)=>React.createElement('div', { key: i, style: {fontSize:12,color:T.txt2,marginBottom:5,lineHeight:1.4}}, "· " , f)))
-            , React.createElement('div', { style: {background:T.card,border:`1px solid ${O}33`,borderRadius:16,padding:14}}, React.createElement('div', { style: {fontSize:10,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "Mejorar"), rep.areas_mejorar?.map((a,i)=>React.createElement('div', { key: i, style: {fontSize:12,color:T.txt2,marginBottom:5,lineHeight:1.4}}, "· " , a)))
+            , React.createElement('div', { style: {background:T.card,border:`1px solid ${TC}33`,borderRadius:16,padding:14}}, React.createElement('div', { style: {fontSize:10,color:TC,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "✅ Logros" ), rep.puntos_fuertes?.map((f,i)=>React.createElement('div', { key: i, style: {fontSize:12,color:T.txt2,marginBottom:5,lineHeight:1.4}}, "· " , f)))
+            , React.createElement('div', { style: {background:T.card,border:`1px solid ${O}33`,borderRadius:16,padding:14}}, React.createElement('div', { style: {fontSize:10,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "🎯 Mejorar" ), rep.areas_mejorar?.map((a,i)=>React.createElement('div', { key: i, style: {fontSize:12,color:T.txt2,marginBottom:5,lineHeight:1.4}}, "· " , a)))
           )
-          , React.createElement('div', { className: "card"}, React.createElement('div', { style: {marginBottom:14}}, React.createElement('div', { style: {fontSize:10,color:"#F4A261",fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Nutricion"), React.createElement('div', { style: {fontSize:13,color:T.txt2,marginBottom:8,lineHeight:1.6}}, rep.nutricion?.comentario), React.createElement('div', { style: {background:"#F4A26118",borderRadius:10,padding:"10px 12px",fontSize:13,color:"#F4A261",fontWeight:600}}, rep.nutricion?.recomendacion)), React.createElement('div', {}, React.createElement('div', { style: {fontSize:10,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Entrenamiento"), React.createElement('div', { style: {fontSize:13,color:T.txt2,marginBottom:8,lineHeight:1.6}}, rep.entrenamiento?.comentario), React.createElement('div', { style: {background:O+"18",borderRadius:10,padding:"10px 12px",fontSize:13,color:O,fontWeight:600}}, rep.entrenamiento?.recomendacion)))
-          , React.createElement('div', { style: {background:T.card,border:`1px solid ${T.brd}`,borderRadius:16,padding:14}}, React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Reto proxima semana"  ), React.createElement('div', { style: {fontSize:14,color:T.txt,fontWeight:600,lineHeight:1.5}}, rep.reto_semana))
+          , React.createElement('div', { className: "card"}
+            , React.createElement('div', { style: {marginBottom:14}}, React.createElement('div', { style: {fontSize:10,color:"#F4A261",fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "🍽 Nutrición" ), React.createElement('div', { style: {fontSize:13,color:T.txt2,marginBottom:8,lineHeight:1.6}}, rep.nutricion?.comentario), React.createElement('div', { style: {background:"#F4A26118",borderRadius:10,padding:"10px 12px",fontSize:13,color:"#F4A261",fontWeight:600}}, "💡 " , rep.nutricion?.recomendacion))
+            , React.createElement('div', {}, React.createElement('div', { style: {fontSize:10,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "💪 Entrenamiento" ), React.createElement('div', { style: {fontSize:13,color:T.txt2,marginBottom:8,lineHeight:1.6}}, rep.entrenamiento?.comentario), React.createElement('div', { style: {background:O+"18",borderRadius:10,padding:"10px 12px",fontSize:13,color:O,fontWeight:600}}, "💡 " , rep.entrenamiento?.recomendacion))
+          )
+          , React.createElement('div', { style: {background:T.card,border:`1px solid ${T.brd}`,borderRadius:16,padding:14}}, React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "🏆 Reto próxima semana"   ), React.createElement('div', { style: {fontSize:14,color:T.txt,fontWeight:600,lineHeight:1.5}}, rep.reto_semana))
           , React.createElement('div', { style: {background:T.card2,borderRadius:16,padding:16,textAlign:"center",border:`1px solid ${T.brd}`}}, React.createElement('div', { style: {fontSize:14,color:O,fontWeight:600,fontStyle:"italic",lineHeight:1.7}}, "\"", rep.mensaje_final, "\""))
-          , React.createElement('button', { className: "bg", style: {width:"100%"}, onClick: ()=>{setRep(null);save({...data,weeklyReport:null});}}, "Nuevo reporte" )
+          , React.createElement('button', { className: "bg", style: {width:"100%"}, onClick: ()=>{setRep(null);save({...data,weeklyReport:null});}}, "🔄 Nuevo reporte"  )
         )
+      )
+
+      , tab==="chat"&&React.createElement('div', {}
+        , React.createElement('div', { className: "ttl"}, "COACH IA" )
+        , React.createElement('div', { className: "sub"}, "Pregúntame lo que quieras sobre fitness, nutrición y tu progreso"         )
+        , React.createElement('div', { style: {background:T.card,borderRadius:20,border:`1px solid ${T.brd}`,marginBottom:12,minHeight:400,maxHeight:"60vh",overflowY:"auto",padding:16,display:"flex",flexDirection:"column",gap:8}}
+          , (data.chatHistory||[]).length===0&&React.createElement('div', { style: {textAlign:"center",padding:"40px 20px"}}
+            , React.createElement('div', { style: {fontSize:40,marginBottom:12}}, "🤖")
+            , React.createElement('div', { style: {fontSize:15,fontWeight:700,color:T.txt,marginBottom:8}}, "Hola " , pr.name||"", "! Soy tu Coach IA"    )
+            , React.createElement('div', { style: {fontSize:13,color:T.txt3,lineHeight:1.6}}, "Puedes preguntarme sobre nutrición, entrenamientos, cómo leer tus macros, qué comer antes/después de entrenar, o cualquier duda de fitness."                  )
+            , React.createElement('div', { style: {marginTop:16,display:"flex",flexDirection:"column",gap:8}}
+              , ["¿Qué debo comer antes de entrenar?","¿Cómo aumento mi proteína sin batidos?","¿Por qué no bajo de peso si hago ejercicio?","Explícame qué son los macros"].map(q=>(
+                React.createElement('button', { key: q, onClick: ()=>setChatInput(q), style: {background:T.card2,border:`1px solid ${T.brd}`,borderRadius:12,padding:"10px 14px",fontSize:12,color:T.txt2,cursor:"pointer",textAlign:"left"}}, q)
+              ))
+            )
+          )
+          , (data.chatHistory||[]).map((m,i)=>(
+            React.createElement('div', { key: i, style: {display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}}
+              , React.createElement('div', { className: m.role==="user"?"chat-bubble-user":"chat-bubble-ai"}, m.content)
+            )
+          ))
+          , chatLd&&React.createElement('div', { style: {display:"flex",justifyContent:"flex-start"}}, React.createElement('div', { className: "chat-bubble-ai"}, React.createElement('span', { style: {opacity:0.7}}, "Escribiendo...")))
+          , React.createElement('div', { ref: chatEndRef})
+        )
+        , React.createElement('div', { style: {display:"flex",gap:8}}
+          , React.createElement('input', { className: "inp", placeholder: "Pregúntame algo sobre fitness..."   , value: chatInput, onChange: e=>setChatInput(e.target.value), onKeyDown: e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();doChat();}}, style: {flex:1}})
+          , React.createElement('button', { className: "btn", onClick: doChat, disabled: chatLd||!chatInput.trim(), style: {width:"auto",padding:"12px 20px"}}, "Enviar")
+        )
+        , (data.chatHistory||[]).length>0&&React.createElement('button', { className: "bg", style: {width:"100%",marginTop:8}, onClick: ()=>save({...data,chatHistory:[]})}, "🗑️ Borrar conversación"  )
       )
 
       , tab==="fotos"&&React.createElement('div', {}
         , React.createElement('div', { className: "ttl"}, "FOTOS")
-        , React.createElement('div', { className: "sub"}, "Tu transformacion visual"  )
-        , data.initM?.photoUrl&&React.createElement('div', { className: "card", style: {borderTop:`3px solid ${O}`}}, React.createElement('div', { style: {fontSize:10,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:12}}, "Foto inicial — Antes"   ), React.createElement('div', { style: {display:"flex",gap:14,alignItems:"flex-start"}}, React.createElement('img', { src: data.initM.photoUrl, alt: "Antes", style: {width:100,height:140,objectFit:"cover",borderRadius:14,border:`2px solid ${O}`}}), React.createElement('div', {}, React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:18,letterSpacing:1}}, "PUNTO DE PARTIDA"  ), data.initM.date&&React.createElement('div', { style: {fontSize:12,color:T.txt3,marginTop:4}}, fmtF(data.initM.date)), data.initM.weight&&React.createElement('div', { style: {fontSize:13,fontWeight:700,marginTop:6}}, data.initM.weight, " kg" ))))
+        , React.createElement('div', { className: "sub"}, "Tu transformación visual"  )
+        , data.initM?.photoUrl&&React.createElement('div', { className: "card", style: {borderTop:`3px solid ${O}`}}
+          , React.createElement('div', { style: {fontSize:10,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:12}}, "📸 Foto inicial — Antes"    )
+          , React.createElement('div', { style: {display:"flex",gap:14,alignItems:"flex-start"}}
+            , React.createElement('img', { src: data.initM.photoUrl, alt: "Antes", style: {width:100,height:140,objectFit:"cover",borderRadius:14,border:`2px solid ${O}`}})
+            , React.createElement('div', {}, React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:18,letterSpacing:1}}, "PUNTO DE PARTIDA"  ), data.initM.date&&React.createElement('div', { style: {fontSize:12,color:T.txt3,marginTop:4}}, "📅 " , fmtF(data.initM.date)), data.initM.weight&&React.createElement('div', { style: {fontSize:13,fontWeight:700,marginTop:6}}, "⚖️ " , data.initM.weight, " kg" ))
+          )
+        )
         , React.createElement('div', { className: "card"}
           , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:12}}, "+ Agregar foto"  )
           , React.createElement('div', { className: "g2", style: {marginBottom:10}}
@@ -1092,7 +1009,7 @@ textarea.inp{resize:vertical;line-height:1.6}
           )
           , React.createElement('div', { className: "lbl"}, "URL de imagen"  )
           , React.createElement('input', { className: "inp", type: "url", placeholder: "https://i.imgur.com/...", value: pUrl, onChange: e=>setPUrl(e.target.value), style: {marginBottom:12}})
-          , React.createElement('button', { className: "btn", onClick: ()=>{if(!pUrl||!pDate)return;save({...data,photos:[...data.photos,{url:pUrl,date:pDate,label:pLbl,id:Date.now()}]});setPUrl("");setPLbl("");msg("Foto guardada");}}, "Agregar foto" )
+          , React.createElement('button', { className: "btn", onClick: ()=>{if(!pUrl||!pDate)return;save({...data,photos:[...data.photos,{url:pUrl,date:pDate,label:pLbl,id:Date.now()}]});setPUrl("");setPLbl("");msg("📸 Guardada");}}, "Agregar foto" )
         )
         , data.photos.length>0&&React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}
           , [...data.photos].sort((a,b)=>new Date(a.date)-new Date(b.date)).map(p=>React.createElement('div', { key: p.id, style: {background:T.card,border:`1px solid ${T.brd}`,borderRadius:16,overflow:"hidden"}}
@@ -1106,7 +1023,7 @@ textarea.inp{resize:vertical;line-height:1.6}
         , React.createElement('div', { className: "ttl"}, "PERFIL")
         , React.createElement('div', { className: "sub"}, "Datos personales y metas"   )
         , React.createElement('div', { className: "card"}
-          , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:14}}, "Datos personales" )
+          , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:14}}, "👤 Datos personales"  )
           , React.createElement('div', { className: "g2", style: {gap:10,marginBottom:10}}
             , React.createElement('div', { style: {gridColumn:"1/-1"}}, React.createElement('div', { className: "lbl"}, "Nombre"), React.createElement('input', { className: "inp", value: pr.name||"", onChange: e=>setPr({...pr,name:e.target.value}), placeholder: "Tu nombre" }))
             , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Edad"), React.createElement('input', { className: "inp", type: "number", value: pr.age, onChange: e=>setPr({...pr,age:e.target.value})}))
@@ -1114,15 +1031,15 @@ textarea.inp{resize:vertical;line-height:1.6}
             , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Estatura (cm)" ), React.createElement('input', { className: "inp", type: "number", value: pr.height, onChange: e=>setPr({...pr,height:e.target.value})}))
             , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Peso (kg)" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", value: pr.weight, onChange: e=>setPr({...pr,weight:e.target.value})}))
           )
-          , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Actividad"), React.createElement('select', { className: "inp", value: pr.activityLevel, onChange: e=>setPr({...pr,activityLevel:e.target.value})}, ACTS.map(a=>React.createElement('option', { key: a.v, value: a.v}, a.l))))
+          , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Nivel de actividad"  ), React.createElement('select', { className: "inp", value: pr.activityLevel, onChange: e=>setPr({...pr,activityLevel:e.target.value})}, ACTS.map(a=>React.createElement('option', { key: a.v, value: a.v}, a.l))))
         )
         , React.createElement('div', { className: "card"}
-          , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Medidas iniciales" )
+          , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "📏 Medidas iniciales"  )
           , React.createElement('div', { style: {fontSize:12,color:T.txt3,marginBottom:14}}, "Tu punto de partida"   )
           , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Fecha"), React.createElement('input', { className: "inp", type: "date", value: initM.date, onChange: e=>setInitM({...initM,date:e.target.value})}))
           , React.createElement('div', { style: {marginBottom:14}}
-            , React.createElement('div', { className: "lbl"}, "Foto inicial" )
-            , initM.photoUrl?(React.createElement('div', { style: {display:"flex",gap:12,alignItems:"center"}}, React.createElement('img', { src: initM.photoUrl, alt: "Inicial", style: {width:80,height:108,objectFit:"cover",borderRadius:12,border:`2px solid ${O}`}}), React.createElement('div', {}, React.createElement('div', { style: {fontSize:12,color:TC,fontWeight:700,marginBottom:10}}, "Guardada"), React.createElement('button', { className: "bg", style: {padding:"8px 14px",fontSize:12}, onClick: ()=>setInitM({...initM,photoUrl:""})}, "Cambiar")))):(
+            , React.createElement('div', { className: "lbl"}, "📸 Foto inicial"  )
+            , initM.photoUrl?(React.createElement('div', { style: {display:"flex",gap:12,alignItems:"center"}}, React.createElement('img', { src: initM.photoUrl, alt: "Inicial", style: {width:80,height:108,objectFit:"cover",borderRadius:12,border:`2px solid ${O}`}}), React.createElement('div', {}, React.createElement('div', { style: {fontSize:12,color:TC,fontWeight:700,marginBottom:10}}, "✅ Guardada" ), React.createElement('button', { className: "bg", style: {padding:"8px 14px",fontSize:12}, onClick: ()=>setInitM({...initM,photoUrl:""})}, "Cambiar")))):(
               React.createElement('div', {}
                 , React.createElement('div', { style: {position:"relative"}}
                   , React.createElement('div', { className: "uzn"}, React.createElement('div', { style: {fontSize:32,marginBottom:8}}, "📷"), React.createElement('div', { style: {fontWeight:700,fontSize:14,marginBottom:4}}, "Subir foto inicial"  ), React.createElement('div', { style: {fontSize:12,color:T.txt3}}, "Toca para seleccionar"  ))
@@ -1138,33 +1055,38 @@ textarea.inp{resize:vertical;line-height:1.6}
             , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Cintura (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: initM.waist, onChange: e=>setInitM({...initM,waist:e.target.value})}))
             , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Cuello (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: initM.neck, onChange: e=>setInitM({...initM,neck:e.target.value})}))
             , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Cadera (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: initM.hips, onChange: e=>setInitM({...initM,hips:e.target.value})}))
-            , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Biceps (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: initM.arms, onChange: e=>setInitM({...initM,arms:e.target.value})}))
+            , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Bíceps (cm)" ), React.createElement('input', { className: "inp", type: "number", step: "0.5", value: initM.arms, onChange: e=>setInitM({...initM,arms:e.target.value})}))
           )
         )
         , React.createElement('div', { className: "card"}
-          , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Analisis con IA"  )
-          , React.createElement('div', { style: {fontSize:12,color:T.txt3,marginBottom:14}}, "Evaluacion de tu condicion inicial"    )
-          , !pr.height||!pr.age?React.createElement('div', { style: {background:T.card2,border:`1px solid ${T.brd}`,borderRadius:12,padding:12,fontSize:12,color:T.txt3}}, "Completa edad y estatura primero"    ):React.createElement('button', { className: "btn", onClick: doAssess, disabled: assLd}, assLd?"Analizando...":"Analizar estado fisico")
+          , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "🩺 Análisis con IA"   )
+          , React.createElement('div', { style: {fontSize:12,color:T.txt3,marginBottom:14}}, "Evaluación de tu condición física inicial"     , initM.photoUrl?" (incluye análisis de foto)":"")
+          , !pr.height||!pr.age?React.createElement('div', { style: {background:T.card2,borderRadius:12,padding:12,fontSize:12,color:T.txt3}}, "Completa edad y estatura primero"    ):React.createElement('button', { className: "btn", onClick: doAssess, disabled: assLd}, assLd?"⏳ Analizando...":"🔍 Analizar estado físico")
           , assErr&&React.createElement('div', { style: {marginTop:10,background:"#EF233C18",borderRadius:12,padding:10,fontSize:12,color:"#EF233C"}}, assErr)
           , assess&&React.createElement('div', { style: {marginTop:14}}
+            , assess.bf&&(()=>{const cat=assess.bfCat||getBFCategory(assess.bf,pr.sex);return(React.createElement('div', { style: {background:T.card2,borderRadius:14,padding:14,marginBottom:12,border:`1px solid ${cat.c}44`,display:"flex",justifyContent:"space-between",alignItems:"center"}}
+              , React.createElement('div', {}, React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase"}}, "% Grasa estimado"  ), React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:36,color:cat.c,letterSpacing:1,lineHeight:1.1}}, assess.bf, React.createElement('span', { style: {fontSize:16}}, "%")), React.createElement('span', { style: {background:cat.c+"22",color:cat.c,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700}}, cat.ok?"✅":"⚠️", " " , cat.l))
+              , React.createElement(Ring, { pct: assess.bf, size: 72, stroke: 6, color: cat.c}, React.createElement('span', { style: {fontSize:11,fontWeight:800,color:cat.c}}, assess.bf, "%"))
+            ));})()
             , React.createElement('div', { style: {background:T.card2,border:`1px solid ${O}44`,borderRadius:16,padding:16,marginBottom:10}}
               , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:20,color:O,letterSpacing:1.5,marginBottom:6}}, assess.titulo)
               , React.createElement('div', { style: {fontSize:13,color:T.txt2,lineHeight:1.7}}, assess.resumen)
+              , assess.composicion_visual&&React.createElement('div', { style: {marginTop:10,background:T.card,borderRadius:10,padding:"8px 12px",fontSize:12,color:T.txt2,fontStyle:"italic"}}, "📸 " , assess.composicion_visual)
             )
             , React.createElement('div', { className: "g2", style: {gap:10,marginBottom:10}}
-              , React.createElement('div', { style: {background:T.card,border:`1px solid ${TC}33`,borderRadius:14,padding:12}}, React.createElement('div', { style: {fontSize:9,color:TC,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "Fortalezas"), assess.fortalezas?.map((f,i)=>React.createElement('div', { key: i, style: {fontSize:12,color:T.txt2,marginBottom:4,lineHeight:1.4}}, "· " , f)))
-              , React.createElement('div', { style: {background:T.card,border:`1px solid ${O}33`,borderRadius:14,padding:12}}, React.createElement('div', { style: {fontSize:9,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "Mejorar"), assess.areas_mejorar?.map((a,i)=>React.createElement('div', { key: i, style: {fontSize:12,color:T.txt2,marginBottom:4,lineHeight:1.4}}, "· " , a)))
+              , React.createElement('div', { style: {background:T.card,border:`1px solid ${TC}33`,borderRadius:14,padding:12}}, React.createElement('div', { style: {fontSize:9,color:TC,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "✅ Fortalezas" ), assess.fortalezas?.map((f,i)=>React.createElement('div', { key: i, style: {fontSize:12,color:T.txt2,marginBottom:4,lineHeight:1.4}}, "· " , f)))
+              , React.createElement('div', { style: {background:T.card,border:`1px solid ${O}33`,borderRadius:14,padding:12}}, React.createElement('div', { style: {fontSize:9,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "🎯 Mejorar" ), assess.areas_mejorar?.map((a,i)=>React.createElement('div', { key: i, style: {fontSize:12,color:T.txt2,marginBottom:4,lineHeight:1.4}}, "· " , a)))
             )
-            , assess.prioridad&&React.createElement('div', { style: {background:T.card2,border:`1px solid ${T.brd}`,borderRadius:14,padding:12,marginBottom:10}}, React.createElement('div', { style: {fontSize:9,color:TC,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Prioridad"), React.createElement('div', { style: {fontSize:13,color:T.txt2}}, assess.prioridad))
+            , assess.prioridad&&React.createElement('div', { style: {background:T.card2,borderRadius:14,padding:12,marginBottom:10,border:`1px solid ${T.brd}`}}, React.createElement('div', { style: {fontSize:9,color:TC,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "⚡ Prioridad" ), React.createElement('div', { style: {fontSize:13,color:T.txt2}}, assess.prioridad))
             , React.createElement('div', { style: {background:T.card2,borderRadius:14,padding:14,textAlign:"center",marginBottom:10,border:`1px solid ${T.brd}`}}, React.createElement('div', { style: {fontSize:14,color:O,fontWeight:600,fontStyle:"italic",lineHeight:1.6}}, "\"", assess.mensaje_motivador, "\""))
-            , React.createElement('button', { className: "bg", style: {width:"100%"}, onClick: ()=>{setAssess(null);save({...data,assessResult:null});}}, "Regenerar")
+            , React.createElement('button', { className: "bg", style: {width:"100%"}, onClick: ()=>{setAssess(null);save({...data,assessResult:null});}}, "🔄 Regenerar" )
           )
         )
         , React.createElement('div', { className: "card"}
-          , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Metas con IA"  )
-          , React.createElement('div', { style: {fontSize:12,color:T.txt3,marginBottom:14}}, "Metas personalizadas segun tu objetivo"    )
+          , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "🎯 Metas con IA"   )
+          , React.createElement('div', { style: {fontSize:12,color:T.txt3,marginBottom:14}}, "Metas personalizadas según tu objetivo"    )
           , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}}
-            , [{v:"definicion muscular",i:"💪",l:"Definicion",s:"Marcar musculo"},{v:"bajar de peso",i:"⚖️",l:"Bajar peso",s:"Reducir grasa"},{v:"tonificar",i:"✨",l:"Tonificar",s:"Firmar figura"},{v:"subir musculo",i:"🏋️",l:"Ganar musculo",s:"Masa y fuerza"},{v:"salud general",i:"❤️",l:"Salud",s:"Bienestar"},{v:"recomposicion",i:"🔄",l:"Recomp.",s:"+musculo mismo peso"}].map(opt=>(
+            , [{v:"definición muscular",i:"💪",l:"Definición",s:"Marcar músculo"},{v:"bajar de peso",i:"⚖️",l:"Bajar peso",s:"Reducir grasa"},{v:"tonificar",i:"✨",l:"Tonificar",s:"Firmar figura"},{v:"subir músculo",i:"🏋️",l:"Ganar músculo",s:"Masa y fuerza"},{v:"salud general",i:"❤️",l:"Salud",s:"Bienestar"},{v:"recomposición",i:"🔄",l:"Recomp.",s:"+músculo mismo peso"}].map(opt=>(
               React.createElement('button', { key: opt.v, onClick: ()=>setGObj(opt.v), style: {padding:"12px 10px",borderRadius:14,border:`2px solid ${gObj===opt.v?O:T.brd}`,background:gObj===opt.v?O+"18":T.card2,cursor:"pointer",textAlign:"left",fontFamily:"Inter,sans-serif"}}
                 , React.createElement('div', { style: {fontSize:20,marginBottom:4}}, opt.i)
                 , React.createElement('div', { style: {fontSize:12,fontWeight:700,color:gObj===opt.v?O:T.txt}}, opt.l)
@@ -1172,7 +1094,7 @@ textarea.inp{resize:vertical;line-height:1.6}
               )
             ))
           )
-          , React.createElement('button', { className: "btn", onClick: doGoals, disabled: gAiLd||!gObj||!pr.weight||!pr.height}, gAiLd?"Generando...":"Generar metas con IA")
+          , React.createElement('button', { className: "btn", onClick: doGoals, disabled: gAiLd||!gObj}, gAiLd?"⏳ Generando...":"✨ Generar metas con IA")
           , gAiErr&&React.createElement('div', { style: {marginTop:10,background:"#EF233C18",borderRadius:12,padding:10,fontSize:12,color:"#EF233C"}}, gAiErr)
           , gAi&&React.createElement('div', { style: {marginTop:14,display:"flex",flexDirection:"column",gap:10}}
             , React.createElement('div', { style: {background:T.card2,border:`1px solid ${O}44`,borderRadius:16,padding:16}}
@@ -1185,17 +1107,17 @@ textarea.inp{resize:vertical;line-height:1.6}
           )
         )
         , React.createElement('div', { className: "card"}
-          , React.createElement('div', { style: {fontSize:12,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:12}}, "Tema visual" )
+          , React.createElement('div', { style: {fontSize:12,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:12}}, "🎨 Tema visual"  )
           , React.createElement('div', { style: {display:"flex",gap:10}}
-            , React.createElement('button', { className: `thmbtn ${theme==="dark"?"on":""}`, onClick: ()=>setTheme("dark")}, "🌙 Oscuro" )
-            , React.createElement('button', { className: `thmbtn ${theme==="light"?"on":""}`, onClick: ()=>setTheme("light")}, "☀️ Claro" )
+            , React.createElement('button', { className: `thmbtn ${theme==="dark"?"on":""}`, onClick: ()=>{setTheme("dark");localStorage.setItem("jf_theme","dark");}}, "🌙 Oscuro" )
+            , React.createElement('button', { className: `thmbtn ${theme==="light"?"on":""}`, onClick: ()=>{setTheme("light");localStorage.setItem("jf_theme","light");}}, "☀️ Claro" )
           )
         )
-        , React.createElement('button', { className: "btn", onClick: ()=>{save({...data,profile:pr,initM});msg("Perfil guardado");}, style: {marginBottom:12}}, "Guardar perfil" )
+        , React.createElement('button', { className: "btn", onClick: ()=>{save({...data,profile:pr,initM});msg("💾 Perfil guardado");}, style: {marginBottom:12}}, "💾 Guardar perfil"  )
         , React.createElement('div', { className: "card", style: {borderTop:"2px solid #EF233C33"}}
-          , React.createElement('div', { style: {fontSize:12,color:"#EF233C",fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Zona de peligro"  )
+          , React.createElement('div', { style: {fontSize:12,color:"#EF233C",fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "⚠️ Zona de peligro"   )
           , React.createElement('div', { style: {fontSize:12,color:T.txt3,marginBottom:12}}, "Elimina todos tus datos permanentemente."    )
-          , React.createElement('button', { className: "bg", style: {borderColor:"#EF233C",color:"#EF233C",width:"100%"}, onClick: ()=>{if(window.confirm("Borrar todo?")){ save(DEF_DATA);setPr(DEF_DATA.profile);setInitM(DEF_DATA.initM);setAssess(null);setGAi(null);setRep(null);setDayTypes({});msg("Datos eliminados");}}}, "Borrar mis datos"  )
+          , React.createElement('button', { className: "bg", style: {borderColor:"#EF233C",color:"#EF233C",width:"100%"}, onClick: ()=>{if(window.confirm("¿Borrar todo? Esta acción no se puede deshacer.")){save(DEF_DATA);setPr(DEF_DATA.profile);setInitM(DEF_DATA.initM);setAssess(null);setGAi(null);setRep(null);setDayTypes({});msg("🗑️ Datos eliminados");}}}, "Borrar mis datos"  )
         )
       )
 
