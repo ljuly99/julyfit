@@ -66,11 +66,11 @@ const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeA
 function calcM(pr,w0,dt="training"){
   const w=parseFloat(w0||pr.weight||0),age=parseInt(pr.age||25),h=parseFloat(pr.height||170);
   if(!w||!h) return null;
-  const protGkg={cut:{training:2.2,rest:2.4},maintain:{training:1.8,rest:2.0},bulk:{training:1.8,rest:2.0}};
+  const protGkg={cut:{training:2.5,rest:2.6},maintain:{training:1.9,rest:2.0},bulk:{training:1.8,rest:1.9}};
   const fatGkg={cut:0.8,maintain:1.0,bulk:1.0};
-  const carbGkg={cut:{training:2.2,rest:1.4},maintain:{training:3.5,rest:2.2},bulk:{training:4.5,rest:3.0}};
+  const carbGkg={cut:{training:2.0,rest:1.5},maintain:{training:3.5,rest:2.2},bulk:{training:4.5,rest:3.0}};
   const g=pr.goal||"cut";
-  const prot=Math.round(w*((protGkg[g]||protGkg.cut)[dt]||2.2));
+  const prot=Math.round(w*((protGkg[g]||protGkg.cut)[dt]||2.5));
   const fat=Math.round(w*(fatGkg[g]||0.8));
   const carb=Math.round(w*((carbGkg[g]||carbGkg.cut)[dt]||2.2));
   const kcal=Math.round(prot*4+carb*4+fat*9);
@@ -278,12 +278,27 @@ function App(){
   const delF=(id)=>{const logs={...(data.foodLogs||{})};logs[fDate]=(logs[fDate]||[]).filter(x=>x.id!==id);save({...data,foodLogs:logs});};
   const addE=()=>{if(!mF.date)return;save({...data,entries:[...data.entries,{...mF,id:Date.now()}]});setMF({date:today,weight:"",bodyfat:"",waist:"",hips:"",neck:"",chest:"",arms:"",note:""});msg("✅ Registro guardado");};
 
-  const saveWO=()=>{
-    const logs={...(data.workoutLogs||{})};logs[wDate]=[...(logs[wDate]||[]),{...wF,id:Date.now()}];
+  const [woRec,setWoRec]=useState(null);
+  const [woRecLd,setWoRecLd]=useState(false);
+
+  const saveWO=async()=>{
+    const wo={...wF,id:Date.now()};
+    const logs={...(data.workoutLogs||{})};logs[wDate]=[...(logs[wDate]||[]),wo];
     const nDT={...dayTypes,[wDate]:"training"};setDayTypes(nDT);
     save({...data,workoutLogs:logs,dayTypes:nDT});
     setWF({type:"Fuerza",duration:"",kcal:"",activeKcal:"",heartRate:"",aerobic:"",anaerobic:"",recovery:"",notes:"",exercises:[]});
     msg("💪 Entrenamiento guardado");
+    // IA: análisis del entreno
+    setWoRecLd(true);setWoRec(null);
+    try{
+      const mac=calcM(pr,latest?.weight,"training",wo);
+      const r=await aiCallJSON(
+        'Coach fitness. SOLO JSON: {"titulo":"","evaluacion":"","intensidad":"Alta|Media|Baja","puntos_clave":["",""],"recomendacion_nutricional":"","recuperacion":"","proximo_entreno":""}',
+        `Tipo:${wo.type}, Duración:${wo.duration}min, Kcal:${wo.kcal||"?"},FC:${wo.heartRate||"?"}bpm. Macros hoy: P${mac?.prot||"?"}g C${mac?.carb||"?"}g G${mac?.fat||"?"}g. ${pr.sex==="female"?"Mujer":"Hombre"} ${pr.age}a,${pr.weight}kg, ${GA[pr.goal]?.l||"definición"}.`
+      );
+      setWoRec(r);
+    }catch(e){console.warn(e);}
+    setWoRecLd(false);
   };
 
   const doRep=async()=>{
@@ -797,6 +812,18 @@ textarea.inp{resize:vertical;line-height:1.6}
           )
           , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Notas"), React.createElement('textarea', { className: "inp", rows: 2, value: wF.notes, onChange: e=>setWF({...wF,notes:e.target.value})}))
           , React.createElement('button', { className: "btn", onClick: saveWO, disabled: !wF.duration&&!wF.exercises.length&&!wF.kcal}, "💪 Guardar entrenamiento"  )
+          , woRecLd&&React.createElement('div', { style: {marginTop:14,textAlign:"center",color:T.txt3,fontSize:13}}, "🤖 Analizando tu entreno…"   )
+          , woRec&&React.createElement('div', { style: {marginTop:14,background:T.card2,borderRadius:16,padding:16,border:`1px solid ${O}44`}}
+            , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}
+              , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:20,color:O,letterSpacing:1}}, woRec.titulo)
+              , React.createElement('span', { className: "bdg", style: {background:woRec.intensidad==="Alta"?"#EF233C18":woRec.intensidad==="Media"?"#F4A26118":"#2DC65318",color:woRec.intensidad==="Alta"?"#EF233C":woRec.intensidad==="Media"?"#F4A261":"#2DC653"}}, woRec.intensidad)
+            )
+            , React.createElement('div', { style: {fontSize:13,color:T.txt2,lineHeight:1.6,marginBottom:12}}, woRec.evaluacion)
+            , woRec.puntos_clave?.length>0&&React.createElement('div', { style: {marginBottom:12}}, woRec.puntos_clave.map((p,i)=>React.createElement('div', { key: i, style: {display:"flex",gap:8,fontSize:12,color:T.txt2,marginBottom:6}}, React.createElement('span', { style: {color:O,fontWeight:700,flexShrink:0}}, "•"), React.createElement('span', {}, p))))
+            , woRec.recomendacion_nutricional&&React.createElement('div', { style: {background:O+"15",borderRadius:12,padding:"10px 14px",marginBottom:8,border:`1px solid ${O}33`}}, React.createElement('div', { style: {fontSize:10,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:4}}, "🍽 Nutrición post-entreno"  ), React.createElement('div', { style: {fontSize:12,color:T.txt2}}, woRec.recomendacion_nutricional))
+            , woRec.recuperacion&&React.createElement('div', { style: {background:TC+"15",borderRadius:12,padding:"10px 14px",marginBottom:8,border:`1px solid ${TC}33`}}, React.createElement('div', { style: {fontSize:10,color:TC,fontWeight:700,textTransform:"uppercase",marginBottom:4}}, "😴 Recuperación" ), React.createElement('div', { style: {fontSize:12,color:T.txt2}}, woRec.recuperacion))
+            , woRec.proximo_entreno&&React.createElement('div', { style: {background:T.card,borderRadius:12,padding:"10px 14px",border:`1px solid ${T.brd}`}}, React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:4}}, "💪 Próximo entreno"  ), React.createElement('div', { style: {fontSize:12,color:T.txt2}}, woRec.proximo_entreno))
+          )
         )
         , ((data.workoutLogs||{})[wDate]||[]).map(w=>React.createElement('div', { key: w.id, className: "card", style: {borderLeft:`3px solid ${O}`}}
           , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}
