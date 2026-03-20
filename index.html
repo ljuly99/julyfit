@@ -13,9 +13,7 @@
   <div id="root"></div>
   <script>
     window.__hl=function(){};
-    window.onerror=function(msg,src,line){
-      document.body.innerHTML='<div style="color:#EF233C;padding:30px;text-align:center;font-family:sans-serif;background:#0B0B14;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-weight:700;margin-bottom:8px">Error</div><div style="font-size:12px;color:#888">'+msg+'</div></div>';
-    };
+    window.onerror=function(msg){document.body.innerHTML='<div style="color:#EF233C;padding:30px;text-align:center;font-family:sans-serif;background:#0B0B14;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-weight:700;margin-bottom:8px">Error</div><div style="font-size:12px;color:#888">'+msg+'</div></div>';};
   </script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -182,7 +180,19 @@ function App(){
     try{const db=getDB();if(db)db.collection("users_index").doc("all").set({users:u}).catch(()=>{});}catch(e){}
   };
 
-  const applyData=(p)=>{setData(p);if(p.profile)setPr(p.profile);if(p.initM)setInitM(p.initM);if(p.dayTypes)setDayTypes(p.dayTypes);if(p.assessResult)setAssess(p.assessResult);if(p.goalAiResult)setGAi(p.goalAiResult);if(p.weeklyReport)setRep(p.weeklyReport);};
+  const applyData=(p)=>{
+    setData(p);
+    if(p.profile)setPr(p.profile);
+    if(p.initM)setInitM(p.initM);
+    if(p.dayTypes)setDayTypes(p.dayTypes);
+    if(p.assessResult)setAssess(p.assessResult);
+    if(p.goalAiResult)setGAi(p.goalAiResult);
+    if(p.weeklyReport)setRep(p.weeklyReport);
+    if(p.woRec){
+      const td=new Date().toISOString().split("T")[0];
+      if(p.woRec.date===td) setWoRec(p.woRec.data);
+    }
+  };
 
   const loadUserData=(name)=>{
     try{const s=localStorage.getItem("jf_u_"+name);if(s)applyData(JSON.parse(s));}catch(e){}
@@ -297,6 +307,8 @@ function App(){
         `Tipo:${wo.type}, Duración:${wo.duration}min, Kcal:${wo.kcal||"?"},FC:${wo.heartRate||"?"}bpm. Macros hoy: P${mac?.prot||"?"}g C${mac?.carb||"?"}g G${mac?.fat||"?"}g. ${pr.sex==="female"?"Mujer":"Hombre"} ${pr.age}a,${pr.weight}kg, ${GA[pr.goal]?.l||"definición"}.`
       );
       setWoRec(r);
+      const td=new Date().toISOString().split("T")[0];
+      save({...data,woRec:{data:r,date:td}});
     }catch(e){console.warn(e);}
     setWoRecLd(false);
   };
