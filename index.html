@@ -209,7 +209,28 @@ const THEMES={
 };
 
 function App(){
-  const today=new Date().toISOString().split("T")[0];
+  const getToday=()=>new Date().toISOString().split("T")[0];
+  const [today,setToday]=useState(getToday());
+  // Update today at midnight automatically
+  useEffect(()=>{
+    const msUntilMidnight=()=>{
+      const now=new Date();
+      const midnight=new Date(now);
+      midnight.setHours(24,0,0,0);
+      return midnight-now;
+    };
+    const scheduleUpdate=()=>{
+      const timer=setTimeout(()=>{
+        setToday(getToday());
+        setFDate(getToday());
+        setWDate(getToday());
+        scheduleUpdate(); // reschedule for next midnight
+      },msUntilMidnight());
+      return timer;
+    };
+    const timer=scheduleUpdate();
+    return()=>clearTimeout(timer);
+  },[]);
 
   // User management
   const [users,setUsers]=useState({});
@@ -221,6 +242,7 @@ function App(){
   const [regName,setRegName]=useState("");
   const [regPass,setRegPass]=useState("");
   const [regPass2,setRegPass2]=useState("");
+  const [regCode,setRegCode]=useState("");
   const [regErr,setRegErr]=useState("");
   const [showLoginPass,setShowLoginPass]=useState(false);
   const [showRegPass,setShowRegPass]=useState(false);
@@ -394,9 +416,11 @@ function App(){
     setScreen("app");
     setLoginName("");setLoginPass("");
   };
+  const INVITE_CODE="JULYFIT2025";
   const doRegister=()=>{
     setRegErr("");
-    if(!regName.trim()||!regPass.trim()||!regPass2.trim()){setRegErr("Completa todos los campos");return;}
+    if(!regCode.trim()||!regName.trim()||!regPass.trim()||!regPass2.trim()){setRegErr("Completa todos los campos");return;}
+    if(regCode.trim().toUpperCase()!==INVITE_CODE){setRegErr("❌ Código de invitación incorrecto");return;}
     if(regPass!==regPass2){setRegErr("Las contraseñas no coinciden");return;}
     if(regPass.length<4){setRegErr("La contraseña debe tener al menos 4 caracteres");return;}
     const key=regName.toLowerCase().trim();
@@ -406,7 +430,7 @@ function App(){
     setCurUser(key);
     loadUserData(key);
     setScreen("app");
-    setRegName("");setRegPass("");setRegPass2("");
+    setRegName("");setRegPass("");setRegPass2("");setRegCode("");
   };
   const doLogout=()=>{if(curUser)save(data);setCurUser(null);setScreen("login");setData(DEF_DATA);setTab("comidas");};
 
@@ -644,6 +668,11 @@ textarea.inp{resize:vertical;line-height:1.6}
       , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:32,letterSpacing:3,color:O,marginBottom:24}}, "NUEVA CUENTA" )
       , React.createElement('div', { style: {width:"100%",maxWidth:380}}
         , regErr&&React.createElement('div', { style: {background:"#EF233C22",border:"1px solid #EF233C44",borderRadius:12,padding:"10px 14px",fontSize:13,color:"#EF233C",marginBottom:14}}, regErr)
+        , React.createElement('div', { style: {marginBottom:12}}
+          , React.createElement('div', { className: "lbl"}, "🔑 Código de invitación"   )
+          , React.createElement('input', { className: "inp", placeholder: "Ingresa tu código de acceso"    , value: regCode, onChange: e=>setRegCode(e.target.value.toUpperCase()), style: {letterSpacing:3,fontWeight:700,textTransform:"uppercase"}})
+          , React.createElement('div', { style: {fontSize:11,color:T.txt3,marginTop:5}}, "Solicita tu código a través de @julyfit_app"      )
+        )
         , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Nombre de usuario"  ), React.createElement('input', { className: "inp", placeholder: "ej: Juli, Carlos..."  , value: regName, onChange: e=>setRegName(e.target.value)}))
         , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Contrasena")
           , React.createElement('div', { style: {position:"relative"}}
