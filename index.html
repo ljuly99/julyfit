@@ -6,6 +6,10 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
+  <!-- v202604080212 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
   <title>JULYFIT</title>
   <style>html,body{height:100%;margin:0;padding:0;background:#0B0B14}*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}</style>
 </head>
@@ -157,7 +161,19 @@ function calcBF(sex,h,w,hi,n){
 const fmt=d=>d?new Date(d+"T12:00:00").toLocaleDateString("es-MX",{day:"2-digit",month:"short"}):"";
 const fmtF=d=>d?new Date(d+"T12:00:00").toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"}):"";
 const fmtWD=d=>d?new Date(d+"T12:00:00").toLocaleDateString("es-MX",{weekday:"short"}).toUpperCase().slice(0,3):"";
-function getWk(){const t=new Date(),dy=t.getDay(),m=new Date(t);m.setDate(t.getDate()-(dy===0?6:dy-1));return Array.from({length:7},(_,i)=>{const d=new Date(m);d.setDate(m.getDate()+i);return d.toISOString().split("T")[0];});}
+function getWk(){
+  const now=new Date();
+  const t=new Date(now.getTime()-now.getTimezoneOffset()*60000);
+  const dy=t.getDay();
+  const m=new Date(t);
+  m.setDate(t.getDate()-(dy===0?6:dy-1));
+  return Array.from({length:7},(_,i)=>{
+    const d=new Date(m);
+    d.setDate(m.getDate()+i);
+    const ld=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+    return ld.toISOString().split("T")[0];
+  });
+}
 
 function Ring({pct,size=64,stroke=6,color,children}){
   const r=(size-stroke*2)/2,c=2*Math.PI*r;
@@ -209,7 +225,11 @@ const THEMES={
 };
 
 function App(){
-  const getToday=()=>new Date().toISOString().split("T")[0];
+  const getToday=()=>{
+    const now=new Date();
+    const local=new Date(now.getTime()-now.getTimezoneOffset()*60000);
+    return local.toISOString().split("T")[0];
+  };
   const [today,setToday]=useState(getToday());
   // Update today at midnight automatically
   useEffect(()=>{
@@ -289,7 +309,7 @@ function App(){
   const [pUrl,setPUrl]=useState("");const [pDate,setPDate]=useState(today);const [pLbl,setPLbl]=useState("");
   const [assess,setAssess]=useState(null);const [assLd,setAssLd]=useState(false);const [assErr,setAssErr]=useState("");
   const [gObj,setGObj]=useState("");const [gAi,setGAi]=useState(null);const [gAiLd,setGAiLd]=useState(false);const [gAiErr,setGAiErr]=useState("");
-  const [rep,setRep]=useState(null);const [repLd,setRepLd]=useState(false);const [repErr,setRepErr]=useState("");
+  const [rep,setRep]=useState(null);const [repDate,setRepDate]=useState(null);const [repLd,setRepLd]=useState(false);const [repErr,setRepErr]=useState("");
   const [toast,setToast]=useState("");
 
   useEffect(()=>{
@@ -331,6 +351,7 @@ function App(){
     if(p.assessResult)setAssess(p.assessResult);
     if(p.goalAiResult)setGAi(p.goalAiResult);
     if(p.weeklyReport)setRep(p.weeklyReport);
+    if(p.weeklyReportDate)setRepDate(p.weeklyReportDate);
     if(p.woRec){
       const td=new Date().toISOString().split("T")[0];
       if(p.woRec.date===td) setWoRec(p.woRec.data);
@@ -542,7 +563,7 @@ function App(){
     try{
       const r=await aiCall('Eres coach fitness. Responde UNICAMENTE con JSON valido. Formato: {"titulo":"","resumen":"","calificacion":"A","puntos_fuertes":[""],"areas_mejorar":[""],"nutricion":{"comentario":"","recomendacion":""},"entrenamiento":{"comentario":"","recomendacion":""},"reto_semana":"","mensaje_final":""}',
         `${pr.sex==="female"?"Mujer":"Hombre"} ${pr.age}a, ${latest?.weight||pr.weight}kg. Entrenos: ${tr}/7. Kcal prom: ${ka.length?Math.round(ka.reduce((a,b)=>a+b)/ka.length):"?"} (meta:${mac?.kcal||"?"}). Prot prom: ${pa.length?Math.round(pa.reduce((a,b)=>a+b)/pa.length):"?"}g (meta:${mac?.prot||"?"}).`);
-      setRep(r);save({...data,weeklyReport:r});msg("Reporte listo");
+      setRep(r);save({...data,weeklyReport:r,weeklyReportDate:wk[0]});msg("📊 Reporte listo");
     }catch(e){setRepErr(e.message||"Error desconocido");}
     setRepLd(false);
   };
@@ -941,7 +962,7 @@ textarea.inp{resize:vertical;line-height:1.6}
           )
           , getDT(wDate)!=="normal"&&React.createElement('div', { style: {fontSize:12,color:DT[getDT(wDate)].c,background:DT[getDT(wDate)].c+"11",borderRadius:10,padding:"8px 12px",fontWeight:500,marginBottom:10}}, DT[getDT(wDate)].tip)
           , mac&&React.createElement('div', { style: {background:T.card2,borderRadius:12,padding:12,border:`1px solid ${T.brd}`}}
-            , React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "Macros para hoy ("   , DT[getDT(wDate)].l.slice(3), ")")
+            , React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "Macros para hoy ("   , DT[getDT(today)]?.l.slice(3)||"Entreno", ")")
             , React.createElement('div', { style: {display:"flex",gap:12,flexWrap:"wrap"}}
               , [{l:"Calorias",v:mac.kcal,u:"kcal",c:O},{l:"Proteina",v:mac.prot,u:"g",c:"#EF233C"},{l:"Carbos",v:mac.carb,u:"g",c:"#F4A261"},{l:"Grasa",v:mac.fat,u:"g",c:TC}].map(m=>(
                 React.createElement('div', { key: m.l, style: {textAlign:"center"}}
