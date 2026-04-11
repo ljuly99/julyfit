@@ -6,12 +6,18 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604080212 -->
+  <!-- v202604112251 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
   <title>JULYFIT</title>
-  <style>html,body{height:100%;margin:0;padding:0;background:#0B0B14}*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}</style>
+  <style>
+    html{font-size:16px}
+    html,body{height:100%;margin:0;padding:0;background:#0B0B14}
+    *{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+    @media(min-width:480px){html{font-size:17px}}
+    @media(min-width:600px){html{font-size:18px}}
+  </style>
 </head>
 <body>
   <div id="root"></div>
@@ -474,7 +480,17 @@ function App(){
   const latest=sorted[sorted.length-1];
   const todayWorkouts=((data.workoutLogs||{})[fDate]||[]);
   const todayWO=todayWorkouts.length>0?todayWorkouts[todayWorkouts.length-1]:null;
-  const mac=calcM(pr,latest?.weight,getDT(fDate),getDT(fDate)==="training"?todayWO:null);
+  // Use custom macros if enabled in profile
+  const getMac=(dt)=>{
+    if(pr.customMacros&&pr.cmProtT&&pr.cmCarbT&&pr.cmFat){
+      const prot=parseFloat(dt==="training"?pr.cmProtT:pr.cmProtR||pr.cmProtT)||0;
+      const carb=parseFloat(dt==="training"?pr.cmCarbT:pr.cmCarbR||pr.cmCarbT)||0;
+      const fat=parseFloat(pr.cmFat)||0;
+      return{kcal:Math.round(prot*4+carb*4+fat*9),prot:Math.round(prot),carb:Math.round(carb),fat:Math.round(fat),g:GA[pr.goal]||GA.cut,dm:DT[dt]||DT.training};
+    }
+    return calcM(pr,latest?.weight,dt,dt==="training"?todayWO:null);
+  };
+  const mac=getMac(getDT(fDate));
   const log=(data.foodLogs||{})[fDate]||[];
   const tot=log.reduce((a,f)=>({k:a.k+(f.k||0),p:a.p+(f.p||0),c:a.c+(f.c||0),f:a.f+(f.f||0)}),{k:0,p:0,c:0,f:0});
   const filt=srch.length>1?FDB.filter(f=>f.n.toLowerCase().includes(srch.toLowerCase())).slice(0,8):[];
@@ -499,7 +515,38 @@ function App(){
   };
   const doAI=async()=>{
     if(!aiTxt.trim())return;setAiLd(true);setAiErr("");setAiPrv(null);
-    try{const r=await aiCall('Eres nutricionista experto. Calcula macros con PRECISION usando valores reales de tablas nutricionales (USDA/FoodData). Para huevos enteros usa: 1 huevo mediano=50g, 6g proteina, 5g grasa, 0.6g carbs, 72kcal. Para huevos grandes=60g, 7g prot, 5g grasa. Responde SOLO con JSON valido sin texto adicional. Formato: {"items":[{"name":"nombre alimento","qty_description":"cantidad descripcion","qty_g":0,"protein":0,"carbs":0,"fat":0,"kcal":0}]}',`Analiza los macros de: ${aiTxt}`);setAiPrv(r.items||[]);}
+    try{const r=await aiCall(
+`Eres nutricionista deportivo experto con acceso a tablas USDA/FoodData Central.
+REGLAS CRITICAS:
+- Usa SIEMPRE los valores exactos por 100g de USDA y multiplica por la cantidad indicada
+- NUNCA subestimes proteina en carnes - las carnes magras cocidas concentran mas proteina
+- Valores USDA por 100g que DEBES usar:
+  * Pollo pechuga cocida: P31g C0g G3.6g 165kcal
+  * Pollo pierna/pernil sin piel cocido: P27-29g C0g G7-9g 190kcal  
+  * Pollo muslo sin piel cocido: P25g C0g G8g 177kcal
+  * Carne res magra 90%: P26g C0g G10g 196kcal
+  * Atun en agua: P26g C0g G1g 116kcal
+  * Salmon: P25g C0g G13g 208kcal
+  * Huevo entero mediano 50g: P6g C0.6g G5g 72kcal
+  * Huevo entero grande 60g: P7g C0.7g G5.4g 86kcal
+  * Clara huevo 33g: P3.6g C0.2g G0.1g 17kcal
+  * Arroz blanco cocido: P2.7g C28g G0.3g 130kcal
+  * Avena cruda: P13g C67g G7g 389kcal
+  * Arepa maiz 80g: P2g C17g G1g 84kcal
+  * Papa cocida: P2g C17g G0.1g 77kcal
+  * Frijoles cocidos: P8.9g C24g G0.5g 132kcal
+  * Aguacate: P2g C9g G15g 160kcal
+  * Aceite oliva 1cda 14g: P0g C0g G14g 126kcal
+  * Leche entera 240ml: P8g C12g G8g 150kcal
+  * Yogur griego 0%: P10g C3.6g G0.4g 59kcal
+  * Whey protein 30g: P24g C3g G1.5g 120kcal
+- Para carnes COCIDAS considera que al cocinar se pierde agua y la proteina se concentra
+- Si dicen "253g de pollo pernil sin hueso sin piel" = usar valores cocidos sin piel
+- Calcula: (valor_por_100g / 100) * gramos_indicados
+- Responde SOLO JSON sin texto adicional`,
+`Calcula macros precisos de: ${aiTxt}
+Formato respuesta: {"items":[{"name":"nombre","qty_description":"cantidad y preparacion","qty_g":0,"protein":0,"carbs":0,"fat":0,"kcal":0}]}`
+);setAiPrv(r.items||[]);}
     catch(e){setAiErr(e.message||"Error desconocido");}
     setAiLd(false);
   };
@@ -599,32 +646,42 @@ function App(){
   --inp:${T.inp};--inp-brd:${T.inpBrd};
 }
 body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif}
+@media(min-width:480px){
+  .inp{font-size:16px;padding:14px 18px}
+  .btn{font-size:17px;padding:16px}
+  .lbl{font-size:12px}
+  .ttl{font-size:36px}
+  .tab{font-size:13px;padding:14px 16px}
+  .fs{font-size:15px;padding:14px 16px}
+  .fr{padding:16px 18px}
+  .card{padding:20px}
+}
 input,select,textarea,button{font-family:'Inter',sans-serif;color:var(--txt)}
-.inp{background:var(--inp);border:1.5px solid var(--inp-brd);border-radius:12px;padding:12px 14px;color:var(--txt);font-size:14px;width:100%;outline:none;transition:border .2s}
+.inp{background:var(--inp);border:1.5px solid var(--inp-brd);border-radius:12px;padding:13px 16px;color:var(--txt);font-size:15px;width:100%;outline:none;transition:border .2s}
 .inp:focus{border-color:var(--acc)}
 select.inp option{background:var(--card)}
 textarea.inp{resize:vertical;line-height:1.6}
-.btn{background:var(--acc);color:#fff;border:none;border-radius:14px;padding:14px;font-weight:700;font-size:15px;cursor:pointer;width:100%}
+.btn{background:var(--acc);color:#fff;border:none;border-radius:14px;padding:15px;font-weight:700;font-size:16px;cursor:pointer;width:100%}
 .btn:disabled{opacity:.35;cursor:not-allowed}
-.bg{background:transparent;border:1.5px solid var(--brd);color:var(--txt3);border-radius:12px;padding:10px 16px;font-weight:600;font-size:13px;cursor:pointer}
+.bg{background:transparent;border:1.5px solid var(--brd);color:var(--txt3);border-radius:12px;padding:11px 18px;font-weight:600;font-size:14px;cursor:pointer}
 .card{background:var(--card);border-radius:20px;padding:18px;border:1px solid var(--brd);margin-bottom:12px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.lbl{font-size:10px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px}
+.lbl{font-size:11px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px}
 .bdg{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:12px 24px;font-size:14px;font-weight:600;z-index:9999;animation:pi .3s ease;pointer-events:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.15)}
 @keyframes pi{from{opacity:0;transform:translateX(-50%) scale(.85)}to{opacity:1;transform:translateX(-50%) scale(1)}}
-.tab{background:none;border:none;cursor:pointer;padding:11px 12px;font-size:11px;font-weight:700;color:var(--txt3);border-bottom:2px solid transparent;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
+.tab{background:none;border:none;cursor:pointer;padding:12px 14px;font-size:12px;font-weight:700;color:var(--txt3);border-bottom:2px solid transparent;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
 .tab.on{color:var(--acc);border-bottom-color:var(--acc)}
-.ttl{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--txt);margin-bottom:4px}
-.sub{font-size:12px;color:var(--txt3);margin-bottom:18px}
-.fr{background:var(--card2);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;border:1px solid var(--brd)}
-.fs{padding:12px 14px;cursor:pointer;border-radius:10px;font-size:13px;color:var(--txt2)}
+.ttl{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--txt);margin-bottom:4px}
+.sub{font-size:13px;color:var(--txt3);margin-bottom:18px}
+.fr{background:var(--card2);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:10px;margin-bottom:8px;border:1px solid var(--brd)}
+.fs{padding:13px 15px;cursor:pointer;border-radius:10px;font-size:14px;color:var(--txt2)}
 .fs:hover{background:var(--card2)}
 .mt{flex:1;padding:10px 4px;border-radius:12px;border:1.5px solid var(--brd);background:var(--card);color:var(--txt3);font-weight:700;font-size:12px;cursor:pointer;text-align:center;transition:all .2s}
 .mt.on{border-color:var(--acc);background:var(--card2);color:var(--acc)}
 .dc{flex:1;padding:12px 6px;border-radius:14px;border:2px solid var(--brd);background:var(--card);cursor:pointer;text-align:center;transition:all .2s}
-.pl{padding:5px 12px;border-radius:20px;border:1.5px solid var(--brd);background:transparent;color:var(--txt3);font-weight:600;font-size:11px;cursor:pointer;white-space:nowrap}
+.pl{padding:7px 14px;border-radius:20px;border:1.5px solid var(--brd);background:transparent;color:var(--txt3);font-weight:600;font-size:12px;cursor:pointer;white-space:nowrap}
 .pl.on{border-color:var(--acc);background:var(--card2);color:var(--acc)}
 .exr{background:var(--card2);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--brd)}
 .uzn{border:2px dashed var(--brd);border-radius:16px;padding:28px 20px;text-align:center;cursor:pointer;background:var(--card)}
@@ -715,7 +772,7 @@ textarea.inp{resize:vertical;line-height:1.6}
 
   // ===== MAIN APP =====
   return(
-    React.createElement('div', { style: {fontFamily:"Inter,sans-serif",minHeight:"100vh",background:T.bg,color:T.txt,maxWidth:480,margin:"0 auto"}}
+    React.createElement('div', { style: {fontFamily:"Inter,sans-serif",minHeight:"100vh",background:T.bg,color:T.txt,maxWidth:600,margin:"0 auto"}}
       , React.createElement('style', {}, CSS)
 
       , React.createElement('div', { style: {background:T.card,borderBottom:`1px solid ${T.brd}`,padding:"0 14px",position:"sticky",top:0,zIndex:100,boxShadow:theme==="light"?"0 1px 8px rgba(0,0,0,0.08)":"none"}}
@@ -1284,7 +1341,37 @@ textarea.inp{resize:vertical;line-height:1.6}
             , React.createElement('button', { className: `thmbtn ${theme==="light"?"on":""}`, onClick: ()=>setTheme("light")}, "☀️ Claro" )
           )
         )
-        , React.createElement('button', { className: "btn", onClick: ()=>{save({...data,profile:pr,initM});msg("Perfil guardado");}, style: {marginBottom:12}}, "Guardar perfil" )
+        , React.createElement('div', { className: "card"}
+          , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}
+            , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase"}}, "Macros personalizados" )
+            , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:8}}
+              , React.createElement('span', { style: {fontSize:12,color:T.txt3}}, pr.customMacros?"Manual":"Auto")
+              , React.createElement('button', { onClick: ()=>setPr(p=>({...p,customMacros:!p.customMacros})), style: {width:44,height:24,borderRadius:12,background:pr.customMacros?O:T.brd,border:"none",cursor:"pointer",position:"relative",transition:"background .2s"}}
+                , React.createElement('div', { style: {width:18,height:18,borderRadius:9,background:"#fff",position:"absolute",top:3,left:pr.customMacros?23:3,transition:"left .2s"}})
+              )
+            )
+          )
+          , pr.customMacros?React.createElement('div', {}
+            , React.createElement('div', { style: {fontSize:12,color:T.txt3,marginBottom:12}}, "Define tus propios macros diarios. Estos reemplazarán el cálculo automático."         )
+            , React.createElement('div', { className: "g2", style: {gap:10}}
+              , React.createElement('div', {}, React.createElement('div', { className: "lbl", style: {color:"#EF233C"}}, "Proteína (g) — Entreno"   ), React.createElement('input', { className: "inp", type: "number", placeholder: "150", value: pr.cmProtT||"", onChange: e=>setPr(p=>({...p,cmProtT:e.target.value}))}))
+              , React.createElement('div', {}, React.createElement('div', { className: "lbl", style: {color:"#EF233C"}}, "Proteína (g) — Descanso"   ), React.createElement('input', { className: "inp", type: "number", placeholder: "156", value: pr.cmProtR||"", onChange: e=>setPr(p=>({...p,cmProtR:e.target.value}))}))
+              , React.createElement('div', {}, React.createElement('div', { className: "lbl", style: {color:"#F4A261"}}, "Carbos (g) — Entreno"   ), React.createElement('input', { className: "inp", type: "number", placeholder: "120", value: pr.cmCarbT||"", onChange: e=>setPr(p=>({...p,cmCarbT:e.target.value}))}))
+              , React.createElement('div', {}, React.createElement('div', { className: "lbl", style: {color:"#F4A261"}}, "Carbos (g) — Descanso"   ), React.createElement('input', { className: "inp", type: "number", placeholder: "90", value: pr.cmCarbR||"", onChange: e=>setPr(p=>({...p,cmCarbR:e.target.value}))}))
+              , React.createElement('div', { style: {gridColumn:"1/-1"}}, React.createElement('div', { className: "lbl", style: {color:"#4ECDC4"}}, "Grasa (g) — Ambos días"    ), React.createElement('input', { className: "inp", type: "number", placeholder: "48", value: pr.cmFat||"", onChange: e=>setPr(p=>({...p,cmFat:e.target.value}))}))
+            )
+            , pr.cmProtT&&pr.cmCarbT&&pr.cmFat&&React.createElement('div', { style: {marginTop:12,background:T.card2,borderRadius:12,padding:12,border:`1px solid ${O}33`}}
+              , React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "Vista previa" )
+              , React.createElement('div', { style: {display:"flex",gap:16,flexWrap:"wrap"}}
+                , React.createElement('div', {}, React.createElement('div', { style: {fontSize:9,color:O,fontWeight:700,textTransform:"uppercase"}}, "Entreno"), React.createElement('div', { style: {fontSize:13,fontWeight:700}}, Math.round(parseFloat(pr.cmProtT||0)*4+parseFloat(pr.cmCarbT||0)*4+parseFloat(pr.cmFat||0)*9), " kcal" ))
+                , React.createElement('div', {}, React.createElement('div', { style: {fontSize:9,color:"#EF233C",fontWeight:700,textTransform:"uppercase"}}, "Proteína"), React.createElement('div', { style: {fontSize:13,fontWeight:700}}, pr.cmProtT, "g"))
+                , React.createElement('div', {}, React.createElement('div', { style: {fontSize:9,color:"#F4A261",fontWeight:700,textTransform:"uppercase"}}, "Carbos"), React.createElement('div', { style: {fontSize:13,fontWeight:700}}, pr.cmCarbT, "g"))
+                , React.createElement('div', {}, React.createElement('div', { style: {fontSize:9,color:"#4ECDC4",fontWeight:700,textTransform:"uppercase"}}, "Grasa"), React.createElement('div', { style: {fontSize:13,fontWeight:700}}, pr.cmFat, "g"))
+              )
+            )
+          ):React.createElement('div', { style: {fontSize:12,color:T.txt3}}, "Los macros se calculan automáticamente según tu peso, objetivo y tipo de día. Activa para personalizarlos."               )
+        )
+                , React.createElement('button', { className: "btn", onClick: ()=>{save({...data,profile:pr,initM});msg("Perfil guardado");}, style: {marginBottom:12}}, "Guardar perfil" )
         , React.createElement('div', { className: "card", style: {borderTop:"2px solid #EF233C33"}}
           , React.createElement('div', { style: {fontSize:12,color:"#EF233C",fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Zona de peligro"  )
           , React.createElement('div', { style: {fontSize:12,color:T.txt3,marginBottom:12}}, "Elimina todos tus datos permanentemente."    )
