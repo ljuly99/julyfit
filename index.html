@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604112251 -->
+  <!-- v202604112312 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
@@ -64,7 +64,14 @@ const DEF_DATA = {
 };
 const MEALS=[{v:"breakfast",l:"🌅 Desayuno"},{v:"lunch",l:"☀️ Almuerzo"},{v:"dinner",l:"🌙 Cena"},{v:"snack",l:"🍎 Snack"}];
 const ACTS=[{v:"sedentary",l:"Sedentario",m:1.2},{v:"light",l:"Ligero (1-3d/sem)",m:1.375},{v:"moderate",l:"Moderado (3-5d/sem)",m:1.55},{v:"active",l:"Activo (6-7d/sem)",m:1.725},{v:"veryactive",l:"Muy activo",m:1.9}];
-const GA={cut:{l:"Definición",ka:-400,p:2.4,f:0.8,c:"#E85D04"},maintain:{l:"Mantenimiento",ka:0,p:2.0,f:1.0,c:"#0096C7"},bulk:{l:"Volumen",ka:350,p:2.0,f:1.0,c:"#457B9D"}};
+const GA={
+  cut:      {l:"Definición muscular", c:"#E85D04"},
+  weightloss:{l:"Bajar de peso",      c:"#EF233C"},
+  tone:     {l:"Tonificar",           c:"#F4A261"},
+  bulk:     {l:"Ganar músculo",       c:"#457B9D"},
+  health:   {l:"Salud general",       c:"#2DC653"},
+  recomp:   {l:"Recomposición",       c:"#9B5DE5"},
+};
 const DT={training:{l:"💪 Entreno",kb:200,pm:1.05,c:"#E85D04",tip:"Más carbs para energía y rendimiento"},rest:{l:"😴 Descanso",kb:-200,pm:1.1,c:"#0096C7",tip:"Menos carbs, más proteína para recuperar"}};
 const WT=["Fuerza","Cardio","HIIT","Funcional","Yoga","Caminata","Ciclismo","Otro"];
 const FDB=[
@@ -88,23 +95,35 @@ function calcM(pr,w0,dt="training",workout=null){
   const g=GA[pr.goal]||GA.cut;
   const dm=DT[dt]||DT.training;
 
-  // PROTEINA basada en peso segun objetivo y tipo de dia
+  // PROTEINA - ratios por objetivo basados en ISSN/ACSM
+  // cut=definicion, weightloss=bajar peso, tone=tonificar, bulk=ganar musculo
+  // health=salud general, recomp=recomposicion corporal
   const protGkg={
-    cut:     {training:2.5, rest:2.6},
-    maintain:{training:1.9, rest:2.0},
-    bulk:    {training:1.8, rest:1.9},
+    cut:       {training:2.5, rest:2.6},   // Alta: preservar musculo en deficit
+    weightloss:{training:2.2, rest:2.3},   // Alta-media: perder grasa preservando musculo
+    tone:      {training:2.2, rest:2.3},   // Alta-media: definir y firmar
+    bulk:      {training:2.0, rest:2.1},   // Media: crecer musculo con superavit
+    health:    {training:1.8, rest:1.9},   // Media: bienestar general
+    recomp:    {training:2.4, rest:2.5},   // Alta: ganar musculo y perder grasa simultaneo
   };
   let prot=Math.round(w*((protGkg[pr.goal]||protGkg.cut)[dt]||(protGkg[pr.goal]||protGkg.cut).rest));
 
-  // GRASA basada en peso
-  const fatGkg={cut:0.8, maintain:1.0, bulk:1.0};
+  // GRASA - minimo 0.7g/kg para hormonas, varia por objetivo
+  const fatGkg={
+    cut:0.8, weightloss:0.7, tone:0.8,
+    bulk:1.0, health:1.0, recomp:0.8
+  };
   let fat=Math.round(w*(fatGkg[pr.goal]||0.8));
 
-  // CARBOS base por objetivo y tipo de dia
+  // CARBOS - periodizados por objetivo y tipo de dia
+  // Menos carbos en deficit/recomp, mas en volumen/salud
   const carbGkg={
-    cut:     {training:2.0, rest:1.5},
-    maintain:{training:3.5, rest:2.2},
-    bulk:    {training:4.5, rest:3.0},
+    cut:       {training:2.0, rest:1.5},   // Moderados: energia para entrenar
+    weightloss:{training:1.8, rest:1.2},   // Bajos: maximizar quema de grasa
+    tone:      {training:2.2, rest:1.5},   // Moderados: energia y definicion
+    bulk:      {training:4.5, rest:3.0},   // Altos: energia para crecer
+    health:    {training:3.0, rest:2.0},   // Moderados: equilibrio
+    recomp:    {training:2.5, rest:1.5},   // Variables: alto entreno bajo descanso
   };
   let carb=Math.round(w*((carbGkg[pr.goal]||carbGkg.cut)[dt]||(carbGkg[pr.goal]||carbGkg.cut).rest));
 
@@ -122,7 +141,7 @@ function calcM(pr,w0,dt="training",workout=null){
     // Definicion: maximo +15g en sesion muy intensa
     // Mantenimiento: maximo +25g
     // Volumen: maximo +35g
-    const maxAdj={cut:15, maintain:25, bulk:35}[pr.goal]||15;
+    const maxAdj={cut:15,weightloss:12,tone:15,bulk:35,health:20,recomp:15}[pr.goal]||15;
     const carbAdjPct={
       "alta":{Fuerza:1.0,Cardio:0.9,HIIT:1.0,Funcional:0.9,Yoga:0,Caminata:0.3,Ciclismo:0.9,Otro:0.7},
       "media":{Fuerza:0.6,Cardio:0.6,HIIT:0.7,Funcional:0.6,Yoga:0,Caminata:0.2,Ciclismo:0.6,Otro:0.5},
@@ -482,11 +501,14 @@ function App(){
   const todayWO=todayWorkouts.length>0?todayWorkouts[todayWorkouts.length-1]:null;
   // Use custom macros if enabled in profile
   const getMac=(dt)=>{
-    if(pr.customMacros&&pr.cmProtT&&pr.cmCarbT&&pr.cmFat){
-      const prot=parseFloat(dt==="training"?pr.cmProtT:pr.cmProtR||pr.cmProtT)||0;
-      const carb=parseFloat(dt==="training"?pr.cmCarbT:pr.cmCarbR||pr.cmCarbT)||0;
+    if(pr.customMacros&&(pr.cmProtT||pr.cmProtR)&&(pr.cmCarbT||pr.cmCarbR)&&pr.cmFat){
+      const isTraining=dt==="training";
+      const prot=parseFloat(isTraining?(pr.cmProtT||pr.cmProtR):(pr.cmProtR||pr.cmProtT))||0;
+      const carb=parseFloat(isTraining?(pr.cmCarbT||pr.cmCarbR):(pr.cmCarbR||pr.cmCarbT))||0;
       const fat=parseFloat(pr.cmFat)||0;
-      return{kcal:Math.round(prot*4+carb*4+fat*9),prot:Math.round(prot),carb:Math.round(carb),fat:Math.round(fat),g:GA[pr.goal]||GA.cut,dm:DT[dt]||DT.training};
+      if(prot>0&&carb>0&&fat>0){
+        return{kcal:Math.round(prot*4+carb*4+fat*9),prot:Math.round(prot),carb:Math.round(carb),fat:Math.round(fat),g:GA[pr.goal]||GA.cut,dm:DT[dt]||DT.training};
+      }
     }
     return calcM(pr,latest?.weight,dt,dt==="training"?todayWO:null);
   };
