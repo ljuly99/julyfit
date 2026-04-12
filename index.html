@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604112312 -->
+  <!-- v202604120649 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
@@ -651,7 +651,9 @@ Formato respuesta: {"items":[{"name":"nombre","qty_description":"cantidad y prep
     try{
       const r=await aiCall('Coach fitness. Responde UNICAMENTE con JSON. Formato: {"titulo":"","resumen":"","tiempo_estimado":"","metas":{"weight":null,"bodyfat":null,"waist":null},"plan_macros":"cut","consejos":[""],"semanas_control":4}',
         `${pr.sex==="female"?"Mujer":"Hombre"},${pr.age}a,${pr.weight}kg,${pr.height}cm,Objetivo:${gObj}`);
-      setGAi(r);setPr(p=>({...p,goal:r.plan_macros}));save({...data,profile:{...pr,goal:r.plan_macros},goalAiResult:r});msg("Metas aplicadas");
+      const goalMap={"cut":"cut","definicion":"cut","definición":"cut","weightloss":"weightloss","bajar":"weightloss","perder":"weightloss","tone":"tone","tonificar":"tone","bulk":"bulk","volumen":"bulk","ganar":"bulk","health":"health","salud":"health","recomp":"recomp","recomposicion":"recomp"};
+      const mappedGoal=goalMap[r.plan_macros?.toLowerCase()]||r.plan_macros||pr.goal;
+      setGAi(r);setPr(p=>({...p,goal:mappedGoal}));save({...data,profile:{...pr,goal:mappedGoal},goalAiResult:r});msg("Metas aplicadas");
     }catch(e){setGAiErr(e.message||"Error desconocido");}
     setGAiLd(false);
   };
@@ -1336,7 +1338,7 @@ textarea.inp{resize:vertical;line-height:1.6}
           , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Metas con IA"  )
           , React.createElement('div', { style: {fontSize:12,color:T.txt3,marginBottom:14}}, "Metas personalizadas segun tu objetivo"    )
           , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}}
-            , [{v:"definicion muscular",i:"💪",l:"Definicion",s:"Marcar musculo"},{v:"bajar de peso",i:"⚖️",l:"Bajar peso",s:"Reducir grasa"},{v:"tonificar",i:"✨",l:"Tonificar",s:"Firmar figura"},{v:"subir musculo",i:"🏋️",l:"Ganar musculo",s:"Masa y fuerza"},{v:"salud general",i:"❤️",l:"Salud",s:"Bienestar"},{v:"recomposicion",i:"🔄",l:"Recomp.",s:"+musculo mismo peso"}].map(opt=>(
+            , [{v:"cut",i:"💪",l:"Definición",s:"Marcar músculo"},{v:"weightloss",i:"⚖️",l:"Bajar peso",s:"Reducir grasa"},{v:"tone",i:"✨",l:"Tonificar",s:"Firmar figura"},{v:"bulk",i:"🏋️",l:"Ganar músculo",s:"Masa y fuerza"},{v:"health",i:"❤️",l:"Salud",s:"Bienestar general"},{v:"recomp",i:"🔄",l:"Recomp.",s:"+músculo mismo peso"}].map(opt=>(
               React.createElement('button', { key: opt.v, onClick: ()=>setGObj(opt.v), style: {padding:"12px 10px",borderRadius:14,border:`2px solid ${gObj===opt.v?O:T.brd}`,background:gObj===opt.v?O+"18":T.card2,cursor:"pointer",textAlign:"left",fontFamily:"Inter,sans-serif"}}
                 , React.createElement('div', { style: {fontSize:20,marginBottom:4}}, opt.i)
                 , React.createElement('div', { style: {fontSize:12,fontWeight:700,color:gObj===opt.v?O:T.txt}}, opt.l)
