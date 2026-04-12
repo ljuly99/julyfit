@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604120649 -->
+  <!-- v202604121705 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
@@ -1289,6 +1289,16 @@ textarea.inp{resize:vertical;line-height:1.6}
             , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Peso (kg)" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", value: pr.weight, onChange: e=>setPr({...pr,weight:e.target.value})}))
           )
           , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Actividad"), React.createElement('select', { className: "inp", value: pr.activityLevel, onChange: e=>setPr({...pr,activityLevel:e.target.value})}, ACTS.map(a=>React.createElement('option', { key: a.v, value: a.v}, a.l))))
+          , React.createElement('div', { style: {marginTop:12}}, React.createElement('div', { className: "lbl"}, "Objetivo")
+            , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginTop:6}}
+              , [{v:"cut",i:"💪",l:"Definición"},{v:"weightloss",i:"⚖️",l:"Bajar peso"},{v:"tone",i:"✨",l:"Tonificar"},{v:"bulk",i:"🏋️",l:"Ganar músculo"},{v:"health",i:"❤️",l:"Salud"},{v:"recomp",i:"🔄",l:"Recomposición"}].map(opt=>(
+                React.createElement('button', { key: opt.v, onClick: ()=>setPr(p=>({...p,goal:opt.v})), style: {padding:"10px 6px",borderRadius:12,border:`2px solid ${pr.goal===opt.v?O:T.brd}`,background:pr.goal===opt.v?O+"22":T.card2,cursor:"pointer",textAlign:"center",fontFamily:"Inter,sans-serif",transition:"all .2s"}}
+                  , React.createElement('div', { style: {fontSize:18,marginBottom:2}}, opt.i)
+                  , React.createElement('div', { style: {fontSize:10,fontWeight:700,color:pr.goal===opt.v?O:T.txt3,lineHeight:1.2}}, opt.l)
+                )
+              ))
+            )
+          )
         )
         , React.createElement('div', { className: "card"}
           , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Medidas iniciales" )
