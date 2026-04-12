@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604121705 -->
+  <!-- v202604121718 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
@@ -647,10 +647,11 @@ Formato respuesta: {"items":[{"name":"nombre","qty_description":"cantidad y prep
     setAssLd(false);
   };
   const doGoals=async()=>{
-    if(!gObj||!pr.weight||!pr.height)return;setGAiLd(true);setGAiErr("");setGAi(null);
+    const obj=gObj||pr.goal;
+    if(!obj||!pr.weight||!pr.height)return;setGAiLd(true);setGAiErr("");setGAi(null);
     try{
       const r=await aiCall('Coach fitness. Responde UNICAMENTE con JSON. Formato: {"titulo":"","resumen":"","tiempo_estimado":"","metas":{"weight":null,"bodyfat":null,"waist":null},"plan_macros":"cut","consejos":[""],"semanas_control":4}',
-        `${pr.sex==="female"?"Mujer":"Hombre"},${pr.age}a,${pr.weight}kg,${pr.height}cm,Objetivo:${gObj}`);
+        `${pr.sex==="female"?"Mujer":"Hombre"},${pr.age}a,${pr.weight}kg,${pr.height}cm,Objetivo:${GA[obj]?.l||obj}`);
       const goalMap={"cut":"cut","definicion":"cut","definición":"cut","weightloss":"weightloss","bajar":"weightloss","perder":"weightloss","tone":"tone","tonificar":"tone","bulk":"bulk","volumen":"bulk","ganar":"bulk","health":"health","salud":"health","recomp":"recomp","recomposicion":"recomp"};
       const mappedGoal=goalMap[r.plan_macros?.toLowerCase()]||r.plan_macros||pr.goal;
       setGAi(r);setPr(p=>({...p,goal:mappedGoal}));save({...data,profile:{...pr,goal:mappedGoal},goalAiResult:r});msg("Metas aplicadas");
@@ -1288,17 +1289,7 @@ textarea.inp{resize:vertical;line-height:1.6}
             , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Estatura (cm)" ), React.createElement('input', { className: "inp", type: "number", value: pr.height, onChange: e=>setPr({...pr,height:e.target.value})}))
             , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Peso (kg)" ), React.createElement('input', { className: "inp", type: "number", step: "0.1", value: pr.weight, onChange: e=>setPr({...pr,weight:e.target.value})}))
           )
-          , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Actividad"), React.createElement('select', { className: "inp", value: pr.activityLevel, onChange: e=>setPr({...pr,activityLevel:e.target.value})}, ACTS.map(a=>React.createElement('option', { key: a.v, value: a.v}, a.l))))
-          , React.createElement('div', { style: {marginTop:12}}, React.createElement('div', { className: "lbl"}, "Objetivo")
-            , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginTop:6}}
-              , [{v:"cut",i:"💪",l:"Definición"},{v:"weightloss",i:"⚖️",l:"Bajar peso"},{v:"tone",i:"✨",l:"Tonificar"},{v:"bulk",i:"🏋️",l:"Ganar músculo"},{v:"health",i:"❤️",l:"Salud"},{v:"recomp",i:"🔄",l:"Recomposición"}].map(opt=>(
-                React.createElement('button', { key: opt.v, onClick: ()=>setPr(p=>({...p,goal:opt.v})), style: {padding:"10px 6px",borderRadius:12,border:`2px solid ${pr.goal===opt.v?O:T.brd}`,background:pr.goal===opt.v?O+"22":T.card2,cursor:"pointer",textAlign:"center",fontFamily:"Inter,sans-serif",transition:"all .2s"}}
-                  , React.createElement('div', { style: {fontSize:18,marginBottom:2}}, opt.i)
-                  , React.createElement('div', { style: {fontSize:10,fontWeight:700,color:pr.goal===opt.v?O:T.txt3,lineHeight:1.2}}, opt.l)
-                )
-              ))
-            )
-          )
+          , React.createElement('div', {}, React.createElement('div', { className: "lbl"}, "Nivel de actividad"  ), React.createElement('select', { className: "inp", value: pr.activityLevel, onChange: e=>setPr({...pr,activityLevel:e.target.value})}, ACTS.map(a=>React.createElement('option', { key: a.v, value: a.v}, a.l))))
         )
         , React.createElement('div', { className: "card"}
           , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Medidas iniciales" )
@@ -1345,27 +1336,42 @@ textarea.inp{resize:vertical;line-height:1.6}
           )
         )
         , React.createElement('div', { className: "card"}
-          , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Metas con IA"  )
-          , React.createElement('div', { style: {fontSize:12,color:T.txt3,marginBottom:14}}, "Metas personalizadas segun tu objetivo"    )
-          , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}}
-            , [{v:"cut",i:"💪",l:"Definición",s:"Marcar músculo"},{v:"weightloss",i:"⚖️",l:"Bajar peso",s:"Reducir grasa"},{v:"tone",i:"✨",l:"Tonificar",s:"Firmar figura"},{v:"bulk",i:"🏋️",l:"Ganar músculo",s:"Masa y fuerza"},{v:"health",i:"❤️",l:"Salud",s:"Bienestar general"},{v:"recomp",i:"🔄",l:"Recomp.",s:"+músculo mismo peso"}].map(opt=>(
-              React.createElement('button', { key: opt.v, onClick: ()=>setGObj(opt.v), style: {padding:"12px 10px",borderRadius:14,border:`2px solid ${gObj===opt.v?O:T.brd}`,background:gObj===opt.v?O+"18":T.card2,cursor:"pointer",textAlign:"left",fontFamily:"Inter,sans-serif"}}
-                , React.createElement('div', { style: {fontSize:20,marginBottom:4}}, opt.i)
-                , React.createElement('div', { style: {fontSize:12,fontWeight:700,color:gObj===opt.v?O:T.txt}}, opt.l)
-                , React.createElement('div', { style: {fontSize:10,color:T.txt3,marginTop:1}}, opt.s)
+          , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "🎯 Mi objetivo"  )
+          , React.createElement('div', { style: {fontSize:12,color:T.txt3,marginBottom:14}}, "Selecciona tu meta — los macros se actualizarán automáticamente"        )
+          , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}
+            , [{v:"cut",i:"💪",l:"Definición",s:"Marcar músculo"},{v:"weightloss",i:"⚖️",l:"Bajar peso",s:"Reducir grasa"},{v:"tone",i:"✨",l:"Tonificar",s:"Firmar figura"},{v:"bulk",i:"🏋️",l:"Ganar músculo",s:"Masa y fuerza"},{v:"health",i:"❤️",l:"Salud",s:"Bienestar"},{v:"recomp",i:"🔄",l:"Recomp.",s:"+músculo mismo peso"}].map(opt=>(
+              React.createElement('button', { key: opt.v, onClick: ()=>{
+                const newPr={...pr,goal:opt.v};
+                setPr(newPr);
+                setGObj(opt.v);
+                // Save immediately so macros update right away
+                save({...data,profile:newPr});
+                msg("✅ Objetivo: "+opt.l);
+              }, style: {padding:"12px 6px",borderRadius:14,border:`2px solid ${pr.goal===opt.v?O:T.brd}`,background:pr.goal===opt.v?O+"22":T.card2,cursor:"pointer",textAlign:"center",fontFamily:"Inter,sans-serif",transition:"all .2s"}}
+                , React.createElement('div', { style: {fontSize:22,marginBottom:4}}, opt.i)
+                , React.createElement('div', { style: {fontSize:11,fontWeight:700,color:pr.goal===opt.v?O:T.txt,lineHeight:1.2}}, opt.l)
+                , React.createElement('div', { style: {fontSize:9,color:T.txt3,marginTop:2,lineHeight:1.2}}, opt.s)
               )
             ))
           )
-          , React.createElement('button', { className: "btn", onClick: doGoals, disabled: gAiLd||!gObj||!pr.weight||!pr.height}, gAiLd?"Generando...":"Generar metas con IA")
+          , pr.goal&&mac&&React.createElement('div', { style: {background:T.card2,borderRadius:14,padding:14,border:`1px solid ${O}33`,marginBottom:14}}
+            , React.createElement('div', { style: {fontSize:10,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "Macros actuales — "   , GA[pr.goal]?.l)
+            , React.createElement('div', { style: {display:"flex",gap:12,flexWrap:"wrap"}}
+              , [{l:"Kcal",v:mac.kcal,u:"",c:O},{l:"Proteína",v:mac.prot,u:"g",c:"#EF233C"},{l:"Carbos",v:mac.carb,u:"g",c:"#F4A261"},{l:"Grasa",v:mac.fat,u:"g",c:TC}].map(m=>(
+                React.createElement('div', { key: m.l}, React.createElement('div', { style: {fontSize:9,color:m.c,fontWeight:700,textTransform:"uppercase"}}, m.l), React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,color:T.txt,letterSpacing:1}}, m.v, React.createElement('span', { style: {fontSize:11,color:T.txt3}}, m.u)))
+              ))
+            )
+          )
+          , React.createElement('div', { style: {fontSize:11,color:T.txt3,marginBottom:10}}, "💡 Opcional: genera un plan personalizado con IA basado en tu estado físico actual"             )
+          , React.createElement('button', { className: "btn", onClick: ()=>{setGObj(pr.goal);doGoals();}, disabled: gAiLd||!pr.goal||!pr.weight||!pr.height, style: {marginBottom:8}}, gAiLd?"Generando plan...":"🤖 Generar plan personalizado con IA")
           , gAiErr&&React.createElement('div', { style: {marginTop:10,background:"#EF233C18",borderRadius:12,padding:10,fontSize:12,color:"#EF233C"}}, gAiErr)
           , gAi&&React.createElement('div', { style: {marginTop:14,display:"flex",flexDirection:"column",gap:10}}
             , React.createElement('div', { style: {background:T.card2,border:`1px solid ${O}44`,borderRadius:16,padding:16}}
               , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:20,color:O,letterSpacing:1.5,marginBottom:6}}, gAi.titulo)
               , React.createElement('div', { style: {fontSize:13,color:T.txt2,lineHeight:1.6,marginBottom:10}}, gAi.resumen)
-              , React.createElement('div', { style: {display:"flex",gap:12}}, React.createElement('div', {}, React.createElement('div', { style: {fontSize:9,color:T.txt3,textTransform:"uppercase",fontWeight:700}}, "Tiempo"), React.createElement('div', { style: {fontWeight:700,color:O,fontSize:13}}, gAi.tiempo_estimado)), React.createElement('div', {}, React.createElement('div', { style: {fontSize:9,color:T.txt3,textTransform:"uppercase",fontWeight:700}}, "Control"), React.createElement('div', { style: {fontWeight:700,color:O,fontSize:13}}, "c/", gAi.semanas_control, " sem" )))
+              , React.createElement('div', { style: {display:"flex",gap:12}}, React.createElement('div', {}, React.createElement('div', { style: {fontSize:9,color:T.txt3,textTransform:"uppercase",fontWeight:700}}, "Tiempo estimado" ), React.createElement('div', { style: {fontWeight:700,color:O,fontSize:13}}, gAi.tiempo_estimado)), React.createElement('div', {}, React.createElement('div', { style: {fontSize:9,color:T.txt3,textTransform:"uppercase",fontWeight:700}}, "Revisión"), React.createElement('div', { style: {fontWeight:700,color:O,fontSize:13}}, "c/", gAi.semanas_control, " sem" )))
             )
-            , gAi.consejos&&React.createElement('div', { style: {background:T.card2,borderRadius:14,padding:14,border:`1px solid ${T.brd}`}}, React.createElement('div', { style: {fontSize:9,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:10}}, "Consejos"), gAi.consejos.map((c,i)=>React.createElement('div', { key: i, style: {display:"flex",gap:8,fontSize:12,color:T.txt2,marginBottom:6}}, React.createElement('span', { style: {color:O,fontWeight:700,flexShrink:0}}, i+1, "."), React.createElement('span', {}, c))))
-            , React.createElement('button', { className: "bg", style: {width:"100%"}, onClick: ()=>{setGAi(null);setGObj("");}}, "Cambiar objetivo" )
+            , gAi.consejos&&React.createElement('div', { style: {background:T.card2,borderRadius:14,padding:14,border:`1px solid ${T.brd}`}}, React.createElement('div', { style: {fontSize:9,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:10}}, "Consejos clave" ), gAi.consejos.map((c,i)=>React.createElement('div', { key: i, style: {display:"flex",gap:8,fontSize:12,color:T.txt2,marginBottom:6}}, React.createElement('span', { style: {color:O,fontWeight:700,flexShrink:0}}, i+1, "."), React.createElement('span', {}, c))))
           )
         )
         , React.createElement('div', { className: "card"}
