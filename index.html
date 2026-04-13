@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604131431 -->
+  <!-- v202604131922 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
@@ -534,7 +534,13 @@ function App(){
     let r;
     try{r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":getAPIKey(),"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1200,system:sys,messages:[{role:"user",content:usr}]})});}
     catch(netErr){throw new Error("Red: "+netErr.message);}
-    if(!r.ok){const t=await r.text();throw new Error("HTTP "+r.status+": "+t.substring(0,300));}
+    if(!r.ok){
+      const t=await r.text();
+      if(r.status===529||r.status===503) throw new Error("La IA está muy ocupada ahora. Intenta en 1-2 minutos ⏳");
+      if(r.status===401) throw new Error("API key inválida. Contacta soporte.");
+      if(r.status===429) throw new Error("Demasiadas solicitudes. Espera un momento ⏳");
+      throw new Error("HTTP "+r.status+": "+t.substring(0,200));
+    }
     const d=await r.json();
     if(d.error) throw new Error(d.error.message||JSON.stringify(d.error));
     const txt=(d.content||[]).map(b=>b.text||"").join("");
@@ -1350,15 +1356,14 @@ textarea.inp{resize:vertical;line-height:1.6}
           , React.createElement('div', { style: {display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}
             , [{v:"cut",i:"💪",l:"Definición",s:"Marcar músculo"},{v:"weightloss",i:"⚖️",l:"Bajar peso",s:"Reducir grasa"},{v:"tone",i:"✨",l:"Tonificar",s:"Firmar figura"},{v:"bulk",i:"🏋️",l:"Ganar músculo",s:"Masa y fuerza"},{v:"health",i:"❤️",l:"Salud",s:"Bienestar"},{v:"recomp",i:"🔄",l:"Recomp.",s:"+músculo mismo peso"}].map(opt=>(
               React.createElement('button', { key: opt.v, onClick: ()=>{
-                const newPr={...pr,goal:opt.v};
+                // Clear customMacros so the formula takes over
+                const newPr={...pr,goal:opt.v,customMacros:false};
                 setPr(newPr);
                 setGObj(opt.v);
-                // Save immediately so macros update right away
-                // Save with latest data to avoid stale closure
-              const latestData={...data,profile:newPr};
-              setData(latestData);
-              save(latestData);
-              msg("✅ Objetivo: "+opt.l);
+                const latestData={...data,profile:newPr};
+                setData(latestData);
+                save(latestData);
+                msg("✅ Objetivo: "+opt.l);
               }, style: {padding:"12px 6px",borderRadius:14,border:`2px solid ${pr.goal===opt.v?O:T.brd}`,background:pr.goal===opt.v?O+"22":T.card2,cursor:"pointer",textAlign:"center",fontFamily:"Inter,sans-serif",transition:"all .2s"}}
                 , React.createElement('div', { style: {fontSize:22,marginBottom:4}}, opt.i)
                 , React.createElement('div', { style: {fontSize:11,fontWeight:700,color:pr.goal===opt.v?O:T.txt,lineHeight:1.2}}, opt.l)
