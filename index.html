@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604121718 -->
+  <!-- v202604130227 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
@@ -368,9 +368,17 @@ function App(){
     }catch(e){}
   };
   const getUserKey=(name)=>`jf_u_${name}`;
+  const GOAL_MAP={"definicion muscular":"cut","definicion":"cut","bajar de peso":"weightloss","tonificar":"tone","subir musculo":"bulk","salud general":"health","recomposicion":"recomp","maintain":"health","volumen":"bulk"};
   const applyData=(p)=>{
     setData(p);
-    if(p.profile)setPr(p.profile);
+    if(p.profile){
+      // Fix legacy goal keys (Spanish) to new English keys
+      const prof={...p.profile};
+      if(prof.goal&&!["cut","weightloss","tone","bulk","health","recomp"].includes(prof.goal)){
+        prof.goal=GOAL_MAP[prof.goal?.toLowerCase()]||"cut";
+      }
+      setPr(prof);
+    }
     if(p.initM)setInitM(p.initM);
     if(p.dayTypes)setDayTypes(p.dayTypes);
     if(p.assessResult)setAssess(p.assessResult);
@@ -1345,8 +1353,11 @@ textarea.inp{resize:vertical;line-height:1.6}
                 setPr(newPr);
                 setGObj(opt.v);
                 // Save immediately so macros update right away
-                save({...data,profile:newPr});
-                msg("✅ Objetivo: "+opt.l);
+                // Save with latest data to avoid stale closure
+              const latestData={...data,profile:newPr};
+              setData(latestData);
+              save(latestData);
+              msg("✅ Objetivo: "+opt.l);
               }, style: {padding:"12px 6px",borderRadius:14,border:`2px solid ${pr.goal===opt.v?O:T.brd}`,background:pr.goal===opt.v?O+"22":T.card2,cursor:"pointer",textAlign:"center",fontFamily:"Inter,sans-serif",transition:"all .2s"}}
                 , React.createElement('div', { style: {fontSize:22,marginBottom:4}}, opt.i)
                 , React.createElement('div', { style: {fontSize:11,fontWeight:700,color:pr.goal===opt.v?O:T.txt,lineHeight:1.2}}, opt.l)
