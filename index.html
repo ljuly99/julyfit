@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604130227 -->
+  <!-- v202604131431 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
@@ -99,12 +99,12 @@ function calcM(pr,w0,dt="training",workout=null){
   // cut=definicion, weightloss=bajar peso, tone=tonificar, bulk=ganar musculo
   // health=salud general, recomp=recomposicion corporal
   const protGkg={
-    cut:       {training:2.5, rest:2.6},   // Alta: preservar musculo en deficit
-    weightloss:{training:2.2, rest:2.3},   // Alta-media: perder grasa preservando musculo
-    tone:      {training:2.2, rest:2.3},   // Alta-media: definir y firmar
-    bulk:      {training:2.0, rest:2.1},   // Media: crecer musculo con superavit
-    health:    {training:1.8, rest:1.9},   // Media: bienestar general
-    recomp:    {training:2.4, rest:2.5},   // Alta: ganar musculo y perder grasa simultaneo
+    cut:       {training:2.5, rest:2.6},
+    weightloss:{training:2.2, rest:2.4},
+    tone:      {training:2.2, rest:2.3},
+    bulk:      {training:2.0, rest:2.1},
+    health:    {training:1.8, rest:1.9},
+    recomp:    {training:2.4, rest:2.5},
   };
   let prot=Math.round(w*((protGkg[pr.goal]||protGkg.cut)[dt]||(protGkg[pr.goal]||protGkg.cut).rest));
 
@@ -118,12 +118,12 @@ function calcM(pr,w0,dt="training",workout=null){
   // CARBOS - periodizados por objetivo y tipo de dia
   // Menos carbos en deficit/recomp, mas en volumen/salud
   const carbGkg={
-    cut:       {training:2.0, rest:1.5},   // Moderados: energia para entrenar
-    weightloss:{training:1.8, rest:1.2},   // Bajos: maximizar quema de grasa
-    tone:      {training:2.2, rest:1.5},   // Moderados: energia y definicion
-    bulk:      {training:4.5, rest:3.0},   // Altos: energia para crecer
-    health:    {training:3.0, rest:2.0},   // Moderados: equilibrio
-    recomp:    {training:2.5, rest:1.5},   // Variables: alto entreno bajo descanso
+    cut:       {training:2.0, rest:1.5},
+    weightloss:{training:1.8, rest:1.2},
+    tone:      {training:2.2, rest:1.5},
+    bulk:      {training:4.5, rest:3.0},
+    health:    {training:3.0, rest:2.0},
+    recomp:    {training:2.5, rest:1.5},
   };
   let carb=Math.round(w*((carbGkg[pr.goal]||carbGkg.cut)[dt]||(carbGkg[pr.goal]||carbGkg.cut).rest));
 
@@ -557,9 +557,10 @@ REGLAS CRITICAS:
   * Carne res magra 90%: P26g C0g G10g 196kcal
   * Atun en agua: P26g C0g G1g 116kcal
   * Salmon: P25g C0g G13g 208kcal
-  * Huevo entero mediano 50g: P6g C0.6g G5g 72kcal
-  * Huevo entero grande 60g: P7g C0.7g G5.4g 86kcal
+  * Huevo entero mediano 50g: P6.3g C0.6g G4.8g 72kcal
+  * Huevo entero grande 60g: P7.5g C0.7g G5.8g 86kcal
   * Clara huevo 33g: P3.6g C0.2g G0.1g 17kcal
+  * IMPORTANTE: si dicen "X huevos enteros + Y claras" calcula cada tipo por separado y suma
   * Arroz blanco cocido: P2.7g C28g G0.3g 130kcal
   * Avena cruda: P13g C67g G7g 389kcal
   * Arepa maiz 80g: P2g C17g G1g 84kcal
