@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604131922 -->
+  <!-- v202604141853 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
@@ -90,10 +90,23 @@ const FDB=[
 
 const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;}return h.toString(36);}
 function calcM(pr,w0,dt="training",workout=null){
-  const w=parseFloat(w0||pr.weight||0),age=parseInt(pr.age||25),h=parseFloat(pr.height||170);
-  if(!w||!h) return null;
+  const wRaw=parseFloat(w0||pr.weight||0),age=parseInt(pr.age||25),h=parseFloat(pr.height||170);
+  if(!wRaw||!h) return null;
   const g=GA[pr.goal]||GA.cut;
   const dm=DT[dt]||DT.training;
+
+  // Para objetivos de perdida de peso y recomposicion, usar Adjusted Body Weight
+  // Esto evita calcular macros demasiado altos en personas con sobrepeso
+  // ABW = IBW + 0.4*(peso_actual - IBW)
+  // IBW = altura(cm) - 105 (mujer) o altura(cm) - 100 (hombre)
+  const getW=()=>{
+    if(!["weightloss","recomp"].includes(pr.goal)) return wRaw;
+    const ibwBase=pr.sex==="male"?h-100:h-105;
+    const ibw=Math.max(ibwBase, wRaw*0.7); // floor: min 70% del peso actual
+    if(wRaw<=ibw) return wRaw; // no hay sobrepeso, usar peso real
+    return Math.round((ibw+0.4*(wRaw-ibw))*10)/10; // ABW
+  };
+  const w=getW();
 
   // PROTEINA - ratios por objetivo basados en ISSN/ACSM
   // cut=definicion, weightloss=bajar peso, tone=tonificar, bulk=ganar musculo
@@ -372,11 +385,16 @@ function App(){
   const applyData=(p)=>{
     setData(p);
     if(p.profile){
-      // Fix legacy goal keys (Spanish) to new English keys
       const prof={...p.profile};
+      // Fix legacy goal keys (Spanish → English)
       if(prof.goal&&!["cut","weightloss","tone","bulk","health","recomp"].includes(prof.goal)){
         prof.goal=GOAL_MAP[prof.goal?.toLowerCase()]||"cut";
       }
+      // SIEMPRE limpiar customMacros para que la formula nueva tome efecto
+      prof.customMacros=false;
+      prof.cmProtT=""; prof.cmProtR="";
+      prof.cmCarbT=""; prof.cmCarbR="";
+      prof.cmFat="";
       setPr(prof);
     }
     if(p.initM)setInitM(p.initM);
