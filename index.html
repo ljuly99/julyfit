@@ -6,11 +6,11 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604250139 -->
+  <!-- v202604250207 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>JULYFIT v202604250139</title>
+  <title>JULYFIT v202604250207</title>
   <style>
     html{font-size:16px}
     html,body{height:100%;margin:0;padding:0;background:#0B0B14}
@@ -1410,13 +1410,16 @@ textarea.inp{resize:vertical;line-height:1.6}
             , [{v:"cut",i:"💪",l:"Definición",s:"Marcar músculo"},{v:"weightloss",i:"⚖️",l:"Bajar peso",s:"Reducir grasa"},{v:"tone",i:"✨",l:"Tonificar",s:"Firmar figura"},{v:"bulk",i:"🏋️",l:"Ganar músculo",s:"Masa y fuerza"},{v:"health",i:"❤️",l:"Salud",s:"Bienestar"},{v:"recomp",i:"🔄",l:"Recomp.",s:"+músculo mismo peso"}].map(opt=>(
               React.createElement('button', { key: opt.v, onClick: ()=>{
                 // Clear customMacros so the formula takes over
-                const newPr={...pr,goal:opt.v,customMacros:false};
+                const newPr={...pr,goal:opt.v,customMacros:false,
+                  cmProtT:"",cmProtR:"",cmCarbT:"",cmCarbR:"",cmFat:""};
                 setPr(newPr);
                 setGObj(opt.v);
                 const latestData={...data,profile:newPr};
                 setData(latestData);
+                // Clear localStorage to force fresh state
+                try{localStorage.removeItem("jf_u_"+curUser);}catch(e){}
                 save(latestData);
-                msg("✅ Objetivo: "+opt.l);
+                msg("✅ Objetivo guardado: "+opt.l);
               }, style: {padding:"12px 6px",borderRadius:14,border:`2px solid ${pr.goal===opt.v?O:T.brd}`,background:pr.goal===opt.v?O+"22":T.card2,cursor:"pointer",textAlign:"center",fontFamily:"Inter,sans-serif",transition:"all .2s"}}
                 , React.createElement('div', { style: {fontSize:22,marginBottom:4}}, opt.i)
                 , React.createElement('div', { style: {fontSize:11,fontWeight:700,color:pr.goal===opt.v?O:T.txt,lineHeight:1.2}}, opt.l)
@@ -1426,10 +1429,24 @@ textarea.inp{resize:vertical;line-height:1.6}
           )
           , pr.goal&&mac&&React.createElement('div', { style: {background:T.card2,borderRadius:14,padding:14,border:`1px solid ${O}33`,marginBottom:14}}
             , React.createElement('div', { style: {fontSize:10,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:8}}, "Macros actuales — "   , GA[pr.goal]?.l)
-            , React.createElement('div', { style: {display:"flex",gap:12,flexWrap:"wrap"}}
+            , React.createElement('div', { style: {display:"flex",gap:12,flexWrap:"wrap",marginBottom:10}}
               , [{l:"Kcal",v:mac.kcal,u:"",c:O},{l:"Proteína",v:mac.prot,u:"g",c:"#EF233C"},{l:"Carbos",v:mac.carb,u:"g",c:"#F4A261"},{l:"Grasa",v:mac.fat,u:"g",c:TC}].map(m=>(
                 React.createElement('div', { key: m.l}, React.createElement('div', { style: {fontSize:9,color:m.c,fontWeight:700,textTransform:"uppercase"}}, m.l), React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:22,color:T.txt,letterSpacing:1}}, m.v, React.createElement('span', { style: {fontSize:11,color:T.txt3}}, m.u)))
               ))
+            )
+            , React.createElement('div', { style: {fontSize:10,color:T.txt3,marginBottom:8}}, "Peso: "
+               , pr.weight, "kg · Manual: "   , pr.customMacros?"SÍ ⚠️":"NO ✅"
+            )
+            , React.createElement('button', { onClick: ()=>{
+              const cleanPr={...pr,customMacros:false,cmProtT:"",cmProtR:"",cmCarbT:"",cmCarbR:"",cmFat:""};
+              setPr(cleanPr);
+              const cleanData={...data,profile:cleanPr};
+              setData(cleanData);
+              try{localStorage.removeItem("jf_u_"+curUser);}catch(e){}
+              save(cleanData);
+              msg("✅ Macros reseteados al automático");
+            }, style: {background:"#EF233C22",border:"1px solid #EF233C44",color:"#EF233C",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer",width:"100%"}}, "🔄 Resetear macros al automático"
+
             )
           )
           , React.createElement('div', { style: {fontSize:11,color:T.txt3,marginBottom:10}}, "💡 Opcional: genera un plan personalizado con IA basado en tu estado físico actual"             )
