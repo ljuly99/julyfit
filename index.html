@@ -6,17 +6,18 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604250207 -->
+  <!-- v202604262342 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>JULYFIT v202604250207</title>
+  <title>JULYFIT v202604262342</title>
   <style>
-    html{font-size:16px}
+    html{font-size:18px}
     html,body{height:100%;margin:0;padding:0;background:#0B0B14}
     *{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
-    @media(min-width:480px){html{font-size:17px}}
-    @media(min-width:600px){html{font-size:18px}}
+    @media(min-width:400px){html{font-size:19px}}
+    @media(min-width:480px){html{font-size:20px}}
+    @media(min-width:600px){html{font-size:21px}}
   </style>
 </head>
 <body>
@@ -441,46 +442,53 @@ function App(){
     }
   };
   const loadUserData=(name)=>{
-    // Try localStorage first (always most recent on this device)
-    let localData=null;
-    try{const s=localStorage.getItem("jf_u_"+name);if(s)localData=JSON.parse(s);}catch(e){}
+    // STRATEGY: Firestore is source of truth, localStorage is cache
+    // Always load from Firestore to ensure cross-device sync
+    // Show localStorage data immediately while Firestore loads (fast UX)
     
-    if(localData){
-      // Add username to data so applyData can save it back
-      localData._user = name;
-      applyData(localData);
-      // Also push local data to Firestore to keep it in sync
-      try{
-        const db=getDB();
-        if(db){
-          const forCloud={...localData};
-          if(forCloud.initM?.photoUrl?.startsWith("data:")) forCloud.initM={...forCloud.initM,photoUrl:""};
-          if(JSON.stringify(forCloud).length<900000){
-            db.collection("userData").doc(name).set(forCloud).catch(()=>{});
-          }
-        }
-      }catch(e){}
-    } else {
-      // No local data - try Firestore (first time on this device)
-      try{
-        const db=getDB();
-        if(db){
-          db.collection("userData").doc(name).get()
-            .then(doc=>{
-              if(doc.exists&&doc.data()){
-                const fd={...doc.data(),_user:name};
-                applyData(fd);
-                try{localStorage.setItem("jf_u_"+name,JSON.stringify(doc.data()));}catch(e){}
-              } else {
-                setData(DEF_DATA);setPr(DEF_DATA.profile);setInitM(DEF_DATA.initM);setDayTypes({});setAssess(null);setGAi(null);setRep(null);
-              }
-            })
-            .catch(()=>{setData(DEF_DATA);setPr(DEF_DATA.profile);setInitM(DEF_DATA.initM);setDayTypes({});setAssess(null);setGAi(null);setRep(null);});
-        } else {
-          setData(DEF_DATA);setPr(DEF_DATA.profile);setInitM(DEF_DATA.initM);setDayTypes({});setAssess(null);setGAi(null);setRep(null);
-        }
-      }catch(e){setData(DEF_DATA);setPr(DEF_DATA.profile);setInitM(DEF_DATA.initM);setDayTypes({});setAssess(null);setGAi(null);setRep(null);}
-    }
+    // Step 1: Show cached data instantly if available
+    try{
+      const s=localStorage.getItem("jf_u_"+name);
+      if(s){
+        const localData={...JSON.parse(s),_user:name};
+        applyData(localData);
+      }
+    }catch(e){}
+    
+    // Step 2: Always fetch from Firestore (source of truth)
+    try{
+      const db=getDB();
+      if(db){
+        db.collection("userData").doc(name).get()
+          .then(doc=>{
+            if(doc.exists&&doc.data()){
+              const fd={...doc.data(),_user:name};
+              applyData(fd); // overwrite with cloud data
+              try{localStorage.setItem("jf_u_"+name,JSON.stringify(doc.data()));}catch(e){}
+            } else {
+              // New user on Firestore - push localStorage data if exists
+              try{
+                const s=localStorage.getItem("jf_u_"+name);
+                if(s){
+                  const localData=JSON.parse(s);
+                  const forCloud={...localData};
+                  if(forCloud.initM?.photoUrl?.startsWith("data:")) forCloud.initM={...forCloud.initM,photoUrl:""};
+                  if(JSON.stringify(forCloud).length<900000){
+                    db.collection("userData").doc(name).set(forCloud).catch(()=>{});
+                  }
+                } else {
+                  setData(DEF_DATA);setPr(DEF_DATA.profile);setInitM(DEF_DATA.initM);
+                  setDayTypes({});setAssess(null);setGAi(null);setRep(null);
+                }
+              }catch(e){}
+            }
+          })
+          .catch(()=>{
+            // Firestore failed - already showing localStorage data
+            console.warn("Firestore load failed, using localStorage");
+          });
+      }
+    }catch(e){console.warn("Firebase error:",e);}
   };
   const save=(next,uname)=>{
     const n=uname||curUser;
@@ -740,41 +748,41 @@ Formato respuesta: {"items":[{"name":"nombre","qty_description":"cantidad y prep
 }
 body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif}
 @media(min-width:480px){
-  .inp{font-size:16px;padding:14px 18px}
-  .btn{font-size:17px;padding:16px}
-  .lbl{font-size:12px}
-  .ttl{font-size:36px}
-  .tab{font-size:13px;padding:14px 16px}
-  .fs{font-size:15px;padding:14px 16px}
-  .fr{padding:16px 18px}
-  .card{padding:20px}
+  .inp{font-size:17px;padding:15px 20px}
+  .btn{font-size:18px;padding:17px}
+  .lbl{font-size:14px}
+  .ttl{font-size:42px}
+  .tab{font-size:15px;padding:14px 18px}
+  .fs{font-size:17px;padding:15px 18px}
+  .fr{padding:18px 20px}
+  .card{padding:22px}
 }
 input,select,textarea,button{font-family:'Inter',sans-serif;color:var(--txt)}
-.inp{background:var(--inp);border:1.5px solid var(--inp-brd);border-radius:12px;padding:13px 16px;color:var(--txt);font-size:15px;width:100%;outline:none;transition:border .2s}
+.inp{background:var(--inp);border:1.5px solid var(--inp-brd);border-radius:12px;padding:14px 18px;color:var(--txt);font-size:16px;width:100%;outline:none;transition:border .2s}
 .inp:focus{border-color:var(--acc)}
 select.inp option{background:var(--card)}
 textarea.inp{resize:vertical;line-height:1.6}
-.btn{background:var(--acc);color:#fff;border:none;border-radius:14px;padding:15px;font-weight:700;font-size:16px;cursor:pointer;width:100%}
+.btn{background:var(--acc);color:#fff;border:none;border-radius:14px;padding:16px;font-weight:700;font-size:17px;cursor:pointer;width:100%}
 .btn:disabled{opacity:.35;cursor:not-allowed}
-.bg{background:transparent;border:1.5px solid var(--brd);color:var(--txt3);border-radius:12px;padding:11px 18px;font-weight:600;font-size:14px;cursor:pointer}
+.bg{background:transparent;border:1.5px solid var(--brd);color:var(--txt3);border-radius:12px;padding:12px 20px;font-weight:600;font-size:15px;cursor:pointer}
 .card{background:var(--card);border-radius:20px;padding:18px;border:1px solid var(--brd);margin-bottom:12px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.lbl{font-size:11px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px}
+.lbl{font-size:13px;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px}
 .bdg{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:12px 24px;font-size:14px;font-weight:600;z-index:9999;animation:pi .3s ease;pointer-events:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.15)}
 @keyframes pi{from{opacity:0;transform:translateX(-50%) scale(.85)}to{opacity:1;transform:translateX(-50%) scale(1)}}
-.tab{background:none;border:none;cursor:pointer;padding:12px 14px;font-size:12px;font-weight:700;color:var(--txt3);border-bottom:2px solid transparent;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
+.tab{background:none;border:none;cursor:pointer;padding:13px 16px;font-size:14px;font-weight:700;color:var(--txt3);border-bottom:2px solid transparent;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
 .tab.on{color:var(--acc);border-bottom-color:var(--acc)}
-.ttl{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--txt);margin-bottom:4px}
-.sub{font-size:13px;color:var(--txt3);margin-bottom:18px}
-.fr{background:var(--card2);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:10px;margin-bottom:8px;border:1px solid var(--brd)}
-.fs{padding:13px 15px;cursor:pointer;border-radius:10px;font-size:14px;color:var(--txt2)}
+.ttl{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;color:var(--txt);margin-bottom:4px}
+.sub{font-size:15px;color:var(--txt3);margin-bottom:18px}
+.fr{background:var(--card2);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:12px;margin-bottom:8px;border:1px solid var(--brd)}
+.fs{padding:14px 16px;cursor:pointer;border-radius:10px;font-size:16px;color:var(--txt2)}
 .fs:hover{background:var(--card2)}
 .mt{flex:1;padding:10px 4px;border-radius:12px;border:1.5px solid var(--brd);background:var(--card);color:var(--txt3);font-weight:700;font-size:12px;cursor:pointer;text-align:center;transition:all .2s}
 .mt.on{border-color:var(--acc);background:var(--card2);color:var(--acc)}
 .dc{flex:1;padding:12px 6px;border-radius:14px;border:2px solid var(--brd);background:var(--card);cursor:pointer;text-align:center;transition:all .2s}
-.pl{padding:7px 14px;border-radius:20px;border:1.5px solid var(--brd);background:transparent;color:var(--txt3);font-weight:600;font-size:12px;cursor:pointer;white-space:nowrap}
+.pl{padding:9px 16px;border-radius:20px;border:1.5px solid var(--brd);background:transparent;color:var(--txt3);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
 .pl.on{border-color:var(--acc);background:var(--card2);color:var(--acc)}
 .exr{background:var(--card2);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--brd)}
 .uzn{border:2px dashed var(--brd);border-radius:16px;padding:28px 20px;text-align:center;cursor:pointer;background:var(--card)}
