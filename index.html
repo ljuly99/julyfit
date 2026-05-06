@@ -6,11 +6,11 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604262342 -->
+  <!-- v202604272154 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>JULYFIT v202604262342</title>
+  <title>JULYFIT v202604272154</title>
   <style>
     html{font-size:18px}
     html,body{height:100%;margin:0;padding:0;background:#0B0B14}
@@ -364,7 +364,7 @@ function App(){
   const [pUrl,setPUrl]=useState("");const [pDate,setPDate]=useState(today);const [pLbl,setPLbl]=useState("");
   const [assess,setAssess]=useState(null);const [assLd,setAssLd]=useState(false);const [assErr,setAssErr]=useState("");
   const [gObj,setGObj]=useState("");const [gAi,setGAi]=useState(null);const [gAiLd,setGAiLd]=useState(false);const [gAiErr,setGAiErr]=useState("");
-  const [rep,setRep]=useState(null);const [repDate,setRepDate]=useState(null);const [repLd,setRepLd]=useState(false);const [repErr,setRepErr]=useState("");
+  const [rep,setRep]=useState(null);const [repDate,setRepDate]=useState(null);const [repLd,setRepLd]=useState(false);const [repErr,setRepErr]=useState("");const [repWk,setRepWk]=useState("current");
   const [toast,setToast]=useState("");
 
   useEffect(()=>{
@@ -437,8 +437,7 @@ function App(){
     if(p.weeklyReport)setRep(p.weeklyReport);
     if(p.weeklyReportDate)setRepDate(p.weeklyReportDate);
     if(p.woRec){
-      const td=new Date().toISOString().split("T")[0];
-      if(p.woRec.date===td) setWoRec(p.woRec.data);
+      setWoRec(p.woRec.data); // show analysis for any date
     }
   };
   const loadUserData=(name)=>{
@@ -685,9 +684,8 @@ Formato respuesta: {"items":[{"name":"nombre","qty_description":"cantidad y prep
     save(newData);
     setWF({type:"Fuerza",duration:"",kcal:"",activeKcal:"",heartRate:"",aerobic:"",anaerobic:"",recovery:"",notes:"",exercises:[]});
     msg("💪 Entrenamiento guardado");
-    // Solo generar análisis IA si es hoy
-    const td=new Date().toISOString().split("T")[0];
-    if(wDate!==td) return;
+    // Generar análisis IA siempre
+    const td=getToday();
     setWoRecLd(true);setWoRec(null);
     try{
       const mac=calcM(pr,latest?.weight,"training",wo);
@@ -700,15 +698,30 @@ Formato respuesta: {"items":[{"name":"nombre","qty_description":"cantidad y prep
     }catch(e){console.warn("WO rec:",e.message);}
     setWoRecLd(false);
   };
+  const getPrevWk=()=>{
+    const now=new Date();
+    const t=new Date(now.getTime()-now.getTimezoneOffset()*60000);
+    const dy=t.getDay();
+    const thisMonday=new Date(t);
+    thisMonday.setDate(t.getDate()-(dy===0?6:dy-1));
+    return Array.from({length:7},(_,i)=>{
+      const d=new Date(thisMonday);
+      d.setDate(thisMonday.getDate()-7+i);
+      const ld=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+      return ld.toISOString().split("T")[0];
+    });
+  };
   const doRep=async()=>{
     setRepLd(true);setRepErr("");
-    const ka=wk.map(d=>((data.foodLogs||{})[d]||[]).reduce((a,f)=>a+(f.k||0),0)).filter(Boolean);
-    const pa=wk.map(d=>((data.foodLogs||{})[d]||[]).reduce((a,f)=>a+(f.p||0),0)).filter(Boolean);
-    const tr=wk.filter(d=>getDT(d)==="training").length;
+    const selectedWk=repWk==="prev"?getPrevWk():wk;
+    const ka=selectedWk.map(d=>((data.foodLogs||{})[d]||[]).reduce((a,f)=>a+(f.k||0),0)).filter(Boolean);
+    const pa=selectedWk.map(d=>((data.foodLogs||{})[d]||[]).reduce((a,f)=>a+(f.p||0),0)).filter(Boolean);
+    const tr=selectedWk.filter(d=>getDT(d)==="training").length;
+    const wkLabel=repWk==="prev"?"semana pasada":"esta semana";
     try{
       const r=await aiCall('Eres coach fitness. Responde UNICAMENTE con JSON valido. Formato: {"titulo":"","resumen":"","calificacion":"A","puntos_fuertes":[""],"areas_mejorar":[""],"nutricion":{"comentario":"","recomendacion":""},"entrenamiento":{"comentario":"","recomendacion":""},"reto_semana":"","mensaje_final":""}',
-        `${pr.sex==="female"?"Mujer":"Hombre"} ${pr.age}a, ${latest?.weight||pr.weight}kg. Entrenos: ${tr}/7. Kcal prom: ${ka.length?Math.round(ka.reduce((a,b)=>a+b)/ka.length):"?"} (meta:${mac?.kcal||"?"}). Prot prom: ${pa.length?Math.round(pa.reduce((a,b)=>a+b)/pa.length):"?"}g (meta:${mac?.prot||"?"}).`);
-      setRep(r);save({...data,weeklyReport:r,weeklyReportDate:wk[0]});msg("📊 Reporte listo");
+        `${pr.sex==="female"?"Mujer":"Hombre"} ${pr.age}a, ${latest?.weight||pr.weight}kg. Semana: ${selectedWk[0]} al ${selectedWk[6]}. Entrenos: ${tr}/7. Kcal prom: ${ka.length?Math.round(ka.reduce((a,b)=>a+b)/ka.length):"?"} (meta:${mac?.kcal||"?"}). Prot prom: ${pa.length?Math.round(pa.reduce((a,b)=>a+b)/pa.length):"?"}g (meta:${mac?.prot||"?"}).`);
+      setRep(r);save({...data,weeklyReport:r,weeklyReportDate:selectedWk[0]});msg("📊 Reporte listo — "+wkLabel);
     }catch(e){setRepErr(e.message||"Error desconocido");}
     setRepLd(false);
   };
@@ -1188,8 +1201,8 @@ textarea.inp{resize:vertical;line-height:1.6}
           )
           , React.createElement('div', { style: {marginBottom:12}}, React.createElement('div', { className: "lbl"}, "Notas"), React.createElement('textarea', { className: "inp", rows: 2, value: wF.notes, onChange: e=>setWF({...wF,notes:e.target.value})}))
           , React.createElement('button', { className: "btn", onClick: saveWO, disabled: !wF.duration&&!wF.exercises.length&&!wF.kcal}, "💪 Guardar entrenamiento"  )
-          , woRecLd&&wDate===new Date().toISOString().split("T")[0]&&React.createElement('div', { style: {marginTop:14,textAlign:"center",color:T.txt3,fontSize:13,padding:10}}, "🤖 Analizando tu entreno…"   )
-          , woRec&&wDate===new Date().toISOString().split("T")[0]&&React.createElement('div', { style: {marginTop:14,background:T.card2,borderRadius:16,padding:16,border:`1px solid ${O}44`}}
+          , woRecLd&&React.createElement('div', { style: {marginTop:14,textAlign:"center",color:T.txt3,fontSize:13,padding:10}}, "🤖 Analizando tu entreno…"   )
+          , woRec&&React.createElement('div', { style: {marginTop:14,background:T.card2,borderRadius:16,padding:16,border:`1px solid ${O}44`}}
             , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}
               , React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:20,color:O,letterSpacing:1}}, woRec.titulo)
               , React.createElement('span', { className: "bdg", style: {background:woRec.intensidad==="Alta"?"#EF233C18":woRec.intensidad==="Media"?"#F4A26118":"#2DC65318",color:woRec.intensidad==="Alta"?"#EF233C":woRec.intensidad==="Media"?"#F4A261":"#2DC653"}}, woRec.intensidad)
@@ -1311,7 +1324,18 @@ textarea.inp{resize:vertical;line-height:1.6}
             , React.createElement('div', { style: {background:T.card2,borderRadius:12,padding:12,textAlign:"center",border:`1px solid ${T.brd}`}}, React.createElement('div', { style: {fontFamily:"Bebas Neue,sans-serif",fontSize:32,color:TC,letterSpacing:1}}, wk.filter(d=>((data.foodLogs||{})[d]||[]).length>0).length), React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase"}}, "Con registro" ))
           )
         )
-        , React.createElement('button', { className: "btn", onClick: doRep, disabled: repLd, style: {marginBottom:12}}, repLd?"Analizando tu semana...":"Generar reporte con IA")
+        , React.createElement('div', { style: {display:"flex",gap:8,marginBottom:14}}
+          , [["current","Esta semana"],["prev","Semana anterior"]].map(([v,l])=>(
+            React.createElement('button', { key: v, onClick: ()=>{setRepWk(v);setRep(null);}, style: {flex:1,padding:"10px 8px",borderRadius:12,border:`2px solid ${repWk===v?O:T.brd}`,background:repWk===v?O+"18":T.card2,cursor:"pointer",fontFamily:"Inter,sans-serif",fontSize:13,fontWeight:700,color:repWk===v?O:T.txt3,transition:"all .2s"}}
+              , v==="current"?"📅":"⏮", " " , l
+            )
+          ))
+        )
+        , React.createElement('div', { style: {display:"flex",gap:8,marginBottom:12}}
+          , React.createElement('button', { className: `mt ${repWk==="current"?"on":""}`, onClick: ()=>setRepWk("current"), style: {flex:1}}, "📅 Esta semana"  )
+          , React.createElement('button', { className: `mt ${repWk==="prev"?"on":""}`, onClick: ()=>setRepWk("prev"), style: {flex:1}}, "⏮ Semana anterior"  )
+        )
+        , React.createElement('button', { className: "btn", onClick: ()=>doRep(repWk), disabled: repLd, style: {marginBottom:12}}, repLd?"Analizando...":"Generar reporte con IA")
         , repErr&&React.createElement('div', { style: {background:"#EF233C18",border:"1px solid #EF233C33",borderRadius:12,padding:12,fontSize:12,color:"#EF233C",marginBottom:12}}, repErr)
         , rep&&React.createElement('div', { style: {display:"flex",flexDirection:"column",gap:12}}
           , React.createElement('div', { className: "card", style: {borderLeft:`4px solid ${rep.calificacion==="A"?TC:rep.calificacion==="B"?"#2DC653":rep.calificacion==="C"?O:"#EF233C"}`}}
