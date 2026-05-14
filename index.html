@@ -6,11 +6,11 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202604272154 -->
+  <!-- v202605130057 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>JULYFIT v202604272154</title>
+  <title>JULYFIT v202605130057</title>
   <style>
     html{font-size:18px}
     html,body{height:100%;margin:0;padding:0;background:#0B0B14}
@@ -62,7 +62,7 @@ const DEF_DATA = {
   profile:{name:"",age:"45",sex:"female",height:"160",weight:"60",activityLevel:"moderate",goal:"cut"},
   initM:{date:"",weight:"",waist:"",hips:"",neck:"",chest:"",arms:"",photoUrl:""},
   assessResult:null, goalAiResult:null, weeklyReport:null,
-  favFoods:[],
+  favFoods:[], stepLogs:{},
 };
 const MEALS=[{v:"breakfast",l:"🌅 Desayuno"},{v:"lunch",l:"☀️ Almuerzo"},{v:"dinner",l:"🌙 Cena"},{v:"snack",l:"🍎 Snack"}];
 const ACTS=[{v:"sedentary",l:"Sedentario",m:1.2},{v:"light",l:"Ligero (1-3d/sem)",m:1.375},{v:"moderate",l:"Moderado (3-5d/sem)",m:1.55},{v:"active",l:"Activo (6-7d/sem)",m:1.725},{v:"veryactive",l:"Muy activo",m:1.9}];
@@ -359,6 +359,7 @@ function App(){
   const [cht,setCht]=useState("weight");
   const [wDate,setWDate]=useState(today);
   const [wF,setWF]=useState({type:"Fuerza",duration:"",kcal:"",activeKcal:"",heartRate:"",aerobic:"",anaerobic:"",recovery:"",notes:"",exercises:[]});
+  const [stepsInput,setStepsInput]=useState("");
   const [exI,setExI]=useState({name:"",sets:"",reps:"",weight:"",distance:""});
   const [showEx,setShowEx]=useState(false);
   const [pUrl,setPUrl]=useState("");const [pDate,setPDate]=useState(today);const [pLbl,setPLbl]=useState("");
@@ -411,24 +412,8 @@ function App(){
       if(prof.goal&&!["cut","weightloss","tone","bulk","health","recomp"].includes(prof.goal)){
         prof.goal=GOAL_MAP[prof.goal?.toLowerCase()]||"cut";
       }
-      // SIEMPRE limpiar customMacros para que la formula nueva tome efecto
-      prof.customMacros=false;
-      prof.cmProtT=""; prof.cmProtR="";
-      prof.cmCarbT=""; prof.cmCarbR="";
-      prof.cmFat="";
+      // Respetar customMacros del usuario - no borrarlos al cargar
       setPr(prof);
-      // Overwrite p.profile with cleaned version so save() persists it
-      p={...p, profile:prof, _v:APP_VERSION};
-      // Save cleaned data back to localStorage and Firebase immediately
-      // Save cleaned profile to localStorage immediately
-      try{
-        const lsKey="jf_u_"+name;
-        const existing=localStorage.getItem(lsKey);
-        if(existing){
-          const parsed=JSON.parse(existing);
-          localStorage.setItem(lsKey,JSON.stringify({...parsed,profile:prof,customMacros:false}));
-        }
-      }catch(e){}
     }
     if(p.initM)setInitM(p.initM);
     if(p.dayTypes)setDayTypes(p.dayTypes);
@@ -491,28 +476,29 @@ function App(){
   };
   const save=(next,uname)=>{
     const n=uname||curUser;
+    if(!n) return;
     setData(next);
-    // Save to localStorage (instant)
+    // Save to localStorage instantly
     try{localStorage.setItem("jf_u_"+n,JSON.stringify(next));}catch(e){}
-    // Save to Firestore - strip large base64 photos to stay under 1MB limit
+    // Save to Firestore - always, strip base64 photos
     try{
       const db=getDB();
-      if(db&&n){
+      if(db){
         const forCloud={...next};
-        // Remove base64 photos from cloud save (keep URL photos)
-        if(forCloud.initM&&forCloud.initM.photoUrl&&forCloud.initM.photoUrl.startsWith("data:")){
+        if(forCloud.initM?.photoUrl?.startsWith("data:"))
           forCloud.initM={...forCloud.initM,photoUrl:""};
+        if(forCloud.photos)
+          forCloud.photos=forCloud.photos.filter(p=>!p.url?.startsWith("data:"));
+        // Remove heavy fields if too large
+        let payload=JSON.stringify(forCloud);
+        if(payload.length>900000){
+          forCloud.photos=[];
+          payload=JSON.stringify(forCloud);
         }
-        if(forCloud.photos){
-          forCloud.photos=forCloud.photos.filter(p=>!p.url||!p.url.startsWith("data:"));
-        }
-        const size=JSON.stringify(forCloud).length;
-        if(size<900000){
-          db.collection("userData").doc(n).set(forCloud)
-            .then(()=>console.log("Firestore OK",Math.round(size/1024)+"KB"))
+        if(payload.length<900000){
+          db.collection("userData").doc(n).set(forCloud,{merge:true})
+            .then(()=>console.log("✅ Firestore",Math.round(payload.length/1024)+"KB"))
             .catch(e=>console.warn("FB:",e.message));
-        } else {
-          console.warn("Data too large for Firestore:",Math.round(size/1024)+"KB");
         }
       }
     }catch(e){console.warn("FB:",e);}
@@ -525,8 +511,9 @@ function App(){
     const u=users[loginName.toLowerCase()];
     if(!u){setLoginErr("Usuario no encontrado");return;}
     if(u.passHash!==hash(loginPass)){setLoginErr("Contraseña incorrecta");return;}
-    setCurUser(loginName.toLowerCase());
-    loadUserData(loginName.toLowerCase());
+    const uname=loginName.toLowerCase();
+    setCurUser(uname);
+    loadUserData(uname);
     setScreen("app");
     setLoginName("");setLoginPass("");
   };
@@ -562,7 +549,15 @@ function App(){
   },[data,curUser]);
 
   const getDT=(d)=>dayTypes[d]||"training";
-  const setDT=(d,t)=>{const n={...dayTypes,[d]:t};setDayTypes(n);save({...data,dayTypes:n});};
+  const setDT=(d,t)=>{
+    const n={...dayTypes,[d]:t};
+    setDayTypes(n);
+    setData(prev=>{
+      const updated={...prev,dayTypes:n};
+      save(updated);
+      return updated;
+    });
+  };
   const sorted=[...data.entries].sort((a,b)=>new Date(a.date)-new Date(b.date));
   const latest=sorted[sorted.length-1];
   const todayWorkouts=((data.workoutLogs||{})[fDate]||[]);
@@ -1154,6 +1149,64 @@ textarea.inp{resize:vertical;line-height:1.6}
                 , React.createElement('div', { style: {fontSize:14}}, hasW?"💪":dt==="rest"?"😴":"·")
               )
             );})
+          )
+        )
+        , React.createElement('div', { className: "card"}
+          , React.createElement('div', { style: {fontSize:12,color:O,fontWeight:700,textTransform:"uppercase",marginBottom:12}}, "👟 Pasos del día"   )
+          , React.createElement('div', { style: {display:"flex",gap:10,alignItems:"center",marginBottom:10}}
+            , React.createElement('div', { style: {flex:1}}
+              , React.createElement('input', { className: "inp", type: "number", placeholder: "ej: 8500" , value: stepsInput, onChange: e=>setStepsInput(e.target.value)})
+            )
+            , React.createElement('button', { className: "btn", style: {width:"auto",padding:"14px 20px"}, onClick: ()=>{
+              if(!stepsInput) return;
+              const logs={...(data.stepLogs||{})};
+              logs[wDate]=parseInt(stepsInput)||0;
+              setStepsInput("");
+              save({...data,stepLogs:logs});
+              msg("👟 Pasos guardados");
+            }}, "Guardar")
+          )
+          , (()=>{
+            const todaySteps=(data.stepLogs||{})[wDate]||0;
+            const goal=10000;
+            const pct=Math.min(100,Math.round(todaySteps/goal*100));
+            const color=pct>=100?"#2DC653":pct>=70?O:"#EF233C";
+            if(!todaySteps) return React.createElement('div',{style:{fontSize:13,color:T.txt3,textAlign:"center",padding:"8px 0"}},"Sin registro de pasos hoy");
+            return React.createElement('div',{style:{background:T.card2,borderRadius:12,padding:14,border:`1px solid ${color}33`}},
+              React.createElement('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}},
+                React.createElement('div',{},
+                  React.createElement('div',{style:{fontFamily:"Bebas Neue,sans-serif",fontSize:32,color:color,letterSpacing:1,lineHeight:1}},todaySteps.toLocaleString()),
+                  React.createElement('div',{style:{fontSize:11,color:T.txt3,fontWeight:700}},`de ${goal.toLocaleString()} pasos · meta`)
+                ),
+                React.createElement('div',{style:{textAlign:"center"}},
+                  React.createElement('div',{style:{fontFamily:"Bebas Neue,sans-serif",fontSize:28,color:color}}),
+                  React.createElement('span',{style:{background:color+"22",color:color,borderRadius:20,padding:"4px 12px",fontSize:13,fontWeight:700}},pct+"%")
+                )
+              ),
+              React.createElement('div',{style:{height:10,borderRadius:10,background:"var(--ring-bg)",overflow:"hidden"}},
+                React.createElement('div',{style:{width:pct+"%",height:"100%",background:color,borderRadius:10,transition:"width .5s"}})
+              ),
+              pct>=100&&React.createElement('div',{style:{fontSize:12,color:"#2DC653",fontWeight:700,textAlign:"center",marginTop:8}},"🎉 ¡Meta alcanzada!")
+            );
+          })()
+          , React.createElement('div', { style: {marginTop:10}}
+            , React.createElement('div', { style: {fontSize:10,color:T.txt3,fontWeight:700,textTransform:"uppercase",marginBottom:6}}, "Esta semana" )
+            , React.createElement('div', { style: {display:"flex",gap:4}}
+              , wk.map(d=>{
+                const s=(data.stepLogs||{})[d]||0;
+                const pct=Math.min(100,Math.round(s/10000*100));
+                const isT=d===wDate;
+                const color=pct>=100?"#2DC653":pct>=70?O:s>0?"#EF233C":T.brd;
+                return React.createElement('div',{key:d,style:{flex:1,textAlign:"center"}},
+                  React.createElement('div',{style:{height:40,background:T.card,borderRadius:6,border:`1px solid ${isT?O:T.brd}`,position:"relative",overflow:"hidden",marginBottom:3}},
+                    s>0&&React.createElement('div',{style:{position:"absolute",bottom:0,left:0,right:0,height:pct+"%",background:color+"44",transition:"height .5s"}}),
+                    React.createElement('div',{style:{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:700,color:isT?O:T.txt3}}),
+                  ),
+                  React.createElement('div',{style:{fontSize:9,color:isT?O:T.txt3,fontWeight:700}},fmtWD(d)),
+                  React.createElement('div',{style:{fontSize:9,color:color,fontWeight:700}},s>0?(s>=1000?Math.round(s/1000)+"k":s):"·")
+                );
+              })
+            )
           )
         )
         , React.createElement('div', { className: "card"}
