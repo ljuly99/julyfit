@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#0B0B14"/>
-  <!-- v202605210034 -->
+  <!-- v202605210056 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
@@ -23,7 +23,7 @@
 <body>
   <div id="root"></div>
   <script>
-    const CURRENT_VERSION="202605210034";
+    const CURRENT_VERSION="202605210056";
     const sv=localStorage.getItem("jf_version");
     if(sv&&sv!==CURRENT_VERSION){localStorage.setItem("jf_version",CURRENT_VERSION);window.location.reload(true);}
     else{localStorage.setItem("jf_version",CURRENT_VERSION);}
@@ -516,7 +516,11 @@ function App(){
     if(!u){setLoginErr("Usuario no encontrado");return;}
     if(u.passHash!==hash(loginPass)){setLoginErr("Contraseña incorrecta");return;}
     const uname=loginName.toLowerCase();
-    resetAllState(); // clear previous user data before loading new
+    // Reset all state BEFORE loading new user to prevent data mixing
+    setData(DEF_DATA);setPr(DEF_DATA.profile);setInitM(DEF_DATA.initM);
+    setDayTypes({});setAssess(null);setGAi(null);setRep(null);
+    setWoRec(null);setTab("comidas");
+    setAiPrv(null);setAiTxt("");setSrch("");setSel(null);
     setCurUser(uname);
     loadUserData(uname);
     setScreen("app");
@@ -538,20 +542,18 @@ function App(){
     setScreen("app");
     setRegName("");setRegPass("");setRegPass2("");setRegCode("");
   };
-  const resetAllState=()=>{
+  const doLogout=()=>{
+    if(curUser) save(data);
+    setCurUser(null);
+    setScreen("login");
+    // Reset everything on logout
     setData(DEF_DATA);setPr(DEF_DATA.profile);setInitM(DEF_DATA.initM);
     setDayTypes({});setAssess(null);setGAi(null);setRep(null);setRepDate(null);
     setWoRec(null);setTab("comidas");setFDate(getToday());setWDate(getToday());
     setAiPrv(null);setAiTxt("");setAiErr("");setSrch("");setSel(null);
     setWF({type:"Fuerza",duration:"",kcal:"",activeKcal:"",heartRate:"",aerobic:"",anaerobic:"",recovery:"",notes:"",exercises:[]});
     setMF({date:getToday(),weight:"",bodyfat:"",waist:"",hips:"",neck:"",chest:"",arms:"",note:""});
-    setStepsInput("");setRep(null);
-  };
-  const doLogout=()=>{
-    if(curUser) save(data);
-    setCurUser(null);
-    setScreen("login");
-    resetAllState();
+    setStepsInput("");
   };
 
   // Auto-save on page close/hide/inactivity
